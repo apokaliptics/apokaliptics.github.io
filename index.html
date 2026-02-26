@@ -25,7 +25,11 @@
 
     <!-- Volume Control -->
     <div class="header-volume">
-      <span class="volume-icon" id="volume-icon">🔊</span>
+      <div class="volume-toggle" id="volume-toggle" title="Mute/Unmute">
+        <div class="volume-bar"></div>
+        <div class="volume-bar"></div>
+        <div class="volume-bar"></div>
+      </div>
       <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="1">
     </div>
 
@@ -43,7 +47,7 @@
       <div class="ripple-bg"></div>
       <div class="content-wrapper oasis-wrapper">
         <div class="oasis-portrait-frame">
-          <img src="imagine (1).png" alt="Oasis Portrait" class="oasis-face-img">
+          <img src="imagine (1).png" alt="Oasis Portrait" class="oasis-face-img" id="the-photo">
         </div>
         <div class="text-block">
           <h1 class="morning-glory-title">WHAT'S THE STORY</h1>
@@ -203,13 +207,14 @@
   </footer>
 
   <!-- Default Page Background Song -->
-  <audio id="bg-music" src="My Chemical Romance - Vampires Will Never Hurt You.flac" autoplay loop
+  <audio id="bg-music" src="My Chemical Romance - Vampires Will Never Hurt You.flac" loop
     style="display: none;"></audio>
 
   <script>
     const bgMusic = document.getElementById('bg-music');
     const volumeSlider = document.getElementById('volume-slider');
-    const volumeIcon = document.getElementById('volume-icon');
+    const volumeToggle = document.getElementById('volume-toggle');
+    const thePhoto = document.getElementById('the-photo');
 
     // Sync initial volume
     bgMusic.volume = volumeSlider.value;
@@ -218,35 +223,41 @@
       const val = parseFloat(e.target.value);
       bgMusic.volume = val;
       if (val === 0) {
-        volumeIcon.textContent = '🔇';
-      } else if (val < 0.5) {
-        volumeIcon.textContent = '🔉';
+        volumeToggle.classList.add('muted');
       } else {
-        volumeIcon.textContent = '🔊';
+        volumeToggle.classList.remove('muted');
       }
     });
 
     // Mute/unmute on icon click
-    volumeIcon.addEventListener('click', () => {
+    volumeToggle.addEventListener('click', () => {
       if (bgMusic.volume > 0) {
         bgMusic.dataset.lastVolume = bgMusic.volume;
         volumeSlider.value = 0;
         bgMusic.volume = 0;
-        volumeIcon.textContent = '🔇';
+        volumeToggle.classList.add('muted');
       } else {
         const lastVol = bgMusic.dataset.lastVolume || 1;
         volumeSlider.value = lastVol;
         bgMusic.volume = lastVol;
-        volumeIcon.textContent = lastVol < 0.5 ? '🔉' : '🔊';
+        volumeToggle.classList.remove('muted');
       }
     });
 
-    // Play on first interaction if blocked
-    document.body.addEventListener('click', () => {
+    // Play on portrait click
+    thePhoto.addEventListener('click', () => {
       if (bgMusic.paused) {
         bgMusic.play().catch(console.error);
+
+        // Optional: Add a little visual feedback on click
+        thePhoto.style.transform = 'scale(0.95)';
+        setTimeout(() => {
+          thePhoto.style.transform = 'scale(1)';
+        }, 150);
+      } else {
+        bgMusic.pause();
       }
-    }, { once: true });
+    });
   </script>
 
 </body>
