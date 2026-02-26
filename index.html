@@ -1,216 +1,200 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Kiet — Introduction</title>
-  <meta name="description" content="Kiet's personal intro: music taste, interests, and projects.">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Landing Page</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=19"><!-- cache-bust -->
-  <meta property="og:title" content="Kiet — Music & Interests">
-  <meta property="og:description" content="Pink Floyd • Oasis • Bowie • MCR • Green Day • The Beatles">
-  <meta property="og:type" content="website">
+  <!-- New edgy/raw fonts and Comic Sans equivalent (Comic Neue) since Comic Sans MS isn't always reliable on all systems via web -->
+  <link
+    href="https://fonts.googleapis.com/css2?family=Anton&family=Permanent+Marker&family=Special+Elite&family=Cutive+Mono&family=Comic+Neue:ital,wght@0,400;0,700;1,400&family=Oswald:wght@400;700&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
-  <header class="wrap">
-    <div class="hero">
-      <img class="avatar" src="imagine.png" alt="Kiet's profile picture">
-      <h1>Kiet Minh</h1>
-      <p class="tag">Welcome to the Black Parade</p>
-      <p class="lyrics">
-  <!-- Replace this placeholder text with your Pink Floyd lyrics -->
-  But it was only fantasy — The wall was too high, as you can see.<br>
-  No matter how he tried, he could not break free.<br>
-  And the worms ate into his brain.
 
-</p>
-      <nav class="nav">
-        <a href="#intro">Introduction</a>
-        <a href="#music">Music taste</a>
-        <a href="#now">Now playing</a>
-        <a href="#photos">Photos</a>
-        <a href="#interests">Interests</a>
-        <a href="#contact">Contact</a>
-      </nav>
-    </div>
-  </header>
+  <!-- Noise Overlay for extra grit -->
+  <div class="noise-overlay"></div>
 
-  <main class="wrap">
-       
-    <section id="intro" class="section-card">
-      <h2>Introduction</h2>
-      <p>
-        Hello, my name's Minh Kiet, you can also call me Noel (my favourite singer/songwriter).
-        Currently I'm an International Business student at Foreign Trade University – Hanoi.
-        Feel free to check out my page.
-      </p>
-    </section>
+  <!-- Navigation -->
+  <nav class="navbar">
+    <a href="#" class="logo-link"><img src="brick-logo.png" alt="Brick Logo" class="logo-img"></a>
+    <ul class="nav-links">
+      <li><a href="#about">About</a></li>
+      <li><a href="#taste">Taste</a></li>
+      <li><a href="#photos">Photos</a></li>
+      <li><a href="#projects">Projects</a></li>
+    </ul>
+  </nav>
 
-    <section id="music" class="section-card">
-      <h2>Music taste</h2>
-      <div class="grid two">
-        <div>
-          <p>I'm a pure rock listener — whatever the subgenre is, I’ll try ^^. Here are some of my favourite tracks (I can't name them all):</p>
-          <ul class="bullets">
-            <li>Pink Floyd — <em>Any Colour You Like</em>, <em>Comfortably Numb</em>, <em>Hey You</em></li>
-            <li>Oasis — <em>Half the World Away</em>, <em>Don’t Look Back in Anger</em></li>
-            <li>David Bowie — <em>Heroes</em>, <em>Station to Station</em></li>
-            <li>My Chemical Romance — <em>Thank You for the Venom</em>, <em>Demolition Lovers</em></li>
-            <li>The Beatles — <em>I Want You (She's So Heavy)</em>, <em>Here, There and Everywhere</em></li>
-            <li>Green Day — <em>Jesus of Suburbia</em>, <em>Stray Heart</em></li>
-          </ul>
-          <p>I am all about the mids; I don’t like piercing treble or too much bass that wrecks my ears :/</p>
+  <main>
+    <!-- Section 1: About Me (Britpop / Morning Glory) -->
+    <section id="about" class="theme-britpop section-content">
+      <div class="ripple-bg"></div>
+      <div class="content-wrapper oasis-wrapper">
+        <div class="oasis-portrait-frame">
+          <img src="imagine (1).png" alt="Oasis Portrait" class="oasis-face-img">
         </div>
-        <aside class="panel">
-          <h3>Gear</h3>
-          <ul class="gear">
-            <li>Moondrop Kadenz (main)</li>
-            <li>BLON BL-03 (casual)</li>
-            <li>FiiO Snowsky Echo Mini DAP</li>
-            <li>Occasional: HD599 / open-back wishlist</li>
-          </ul>
-        </aside>
-      </div>
-    </section>
- <!-- Artists index -->
-    <section id="artists" class="section-card">
-      <h2>Artists</h2>
-      <div class="artist-index">
-        <a href="#pinkfloyd" class="chip chip-link">Pink Floyd</a>
-        <a href="#oasis" class="chip chip-link">Oasis</a>
-        <a href="#bowie" class="chip chip-link">David Bowie</a>
-        <a href="#mcr" class="chip chip-link">My Chemical Romance</a>
-        <a href="#greenday" class="chip chip-link">Green Day</a>
-        <a href="#beatles" class="chip chip-link">The Beatles</a>
-      </div>
-    </section>
-
-    <!-- Artist bios -->
-    <section id="artist-bios" class="section-card">
-      <h2>Artist Biographies & Discographies</h2>
-
-      <div id="pinkfloyd" class="artist-card">
-        <h3>Pink Floyd <span class="era">1965–2014</span></h3>
-        <p>Pink Floyd are an English rock band formed in London in 1965. Gaining an early following as one of the first British psychedelic groups, they were distinguished by their extended compositions, sonic experiments, philosophical lyrics, and elaborate live performances, and became a leading progressive rock band. They were distinguished by their extended compositions, sonic experiments, philosophical lyrics, and elaborate live performances. Known for <em>The Dark Side of the Moon</em>, <em>Wish You Were Here</em>, and <em>The Wall</em>.</p>
-        <div class="backtop"><a href="#artists">↑ Back to Artists</a></div>
-      </div>
-
-      <div id="oasis" class="artist-card">
-        <h3>Oasis <span class="era">1991–2009</span></h3>
-        <p>Oasis are an English rock band formed in Manchester in 1991. The group initially consisted of Liam Gallagher (lead vocals), Paul "Bonehead" Arthurs (guitar), Paul "Guigsy" McGuigan (bass guitar) and Tony McCarroll (drums). Liam asked his older brother Noel Gallagher (lead guitar, vocals) to join as a fifth member a few months later to finalise their formation. Noel became the de facto leader of the group and took over the songwriting duties for the band's first four studio albums. They are regarded as one of the defining and most globally successful groups of the Britpop genre. Notable albums: <em>(What's the Story) Morning Glory?</em> and <em>Definitely Maybe</em>.</p>
-        <div class="backtop"><a href="#artists">↑ Back to Artists</a></div>
-      </div>
-
-      <div id="bowie" class="artist-card">
-        <h3>David Bowie <span class="era">1947–2016</span></h3>
-        <p>David Robert Jones (8 January 1947 – 10 January 2016), known as David Bowie, was an English singer, songwriter and actor. Regarded as among the most influential musicians of the 20th century, Bowie received particular acclaim for his work in the 1970s. The Starman himself, blending glam, art rock, and reinvention with albums like <em>Heroes</em>, <em>Station to Station</em>, and <em>Blackstar</em>.</p>
-        <div class="backtop"><a href="#artists">↑ Back to Artists</a></div>
-      </div>
-
-      <div id="mcr" class="artist-card">
-        <h3>My Chemical Romance <span class="era">2001–present</span></h3>
-        <p>My Chemical Romance is an American rock band from New Jersey. The band's current lineup consists of lead vocalist Gerard Way, lead guitarist Ray Toro, rhythm guitarist Frank Iero, and bassist Mikey Way. Notable albums <em>The Black Parade</em> Three Cheers for Sweet Revenge<em>I Brought You My Bullets, You Brought Me Your Love</em></p>
-        <div class="backtop"><a href="#artists">↑ Back to Artists</a></div>
-      </div>
-
-      <div id="greenday" class="artist-card">
-        <h3>Green Day <span class="era">1986–present</span></h3>
-        <p>Green Day is an American rock band formed in Rodeo, California, in 1987, by lead vocalist and guitarist Billie Joe Armstrong and bassist and backing vocalist Mike Dirnt, with drummer Tré Cool joining in 1990. Notable albums: <em>Dookie</em>, <em>American Idiot</em>, and <em>21st Century Breakdown</em>.</p>
-        <div class="backtop"><a href="#artists">↑ Back to Artists</a></div>
-      </div>
-
-      <div id="beatles" class="artist-card">
-        <h3>The Beatles <span class="era">1960–1970</span></h3>
-        <p>The Beatles were an English rock band formed in Liverpool in 1960. The core lineup of the band comprised John Lennon, Paul McCartney, George Harrison and Ringo Starr. They are widely regarded as the most influential band in Western popular music and were integral to the development of 1960s counterculture and the recognition of popular music as an art form. Notable albums: <em>Sgt. Pepper’s</em>, <em>Abbey Road</em>, <em>Revolver</em> and <em>White Album</em>.</p>
-        <div class="backtop"><a href="#artists">↑ Back to Artists</a></div>
-      </div>
-    </section>
-
-    <section id="now" class="section-card">
-      <h2>Now playing / playlists</h2>
-      <div class="embeds">
-        <iframe src="https://open.spotify.com/embed/playlist/41b2SzteSYd21jChRjdZdJ?utm_source=generator"
-          width="100%" height="152" frameborder="0"
-          style="display:block;height:152px;border:0;border-radius:12px"
-          allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-          loading="lazy"></iframe>
-
-        <iframe src="https://open.spotify.com/embed/playlist/5nlfLOnW6GLqG2rbg8bBAm?utm_source=generator"
-          width="100%" height="152" frameborder="0"
-          style="display:block;height:152px;border:0;border-radius:12px"
-          allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-          loading="lazy"></iframe>
-
-        <iframe src="https://open.spotify.com/embed/playlist/683NDQxAOWDsQXYBNaGc6b?utm_source=generator"
-          width="100%" height="152" frameborder="0"
-          style="display:block;height:152px;border:0;border-radius:12px"
-          allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-          loading="lazy"></iframe>
-      </div>
-    </section>
-
-    <!-- Highlighted photos -->
-    <section id="photos" class="section-card">
-      <h2>Highlighted photos</h2>
-      <div class="photo-grid">
-        <figure>
-          <img src="vungtau.jpg" alt="Sunset at Vũng Tàu seaside" loading="lazy">
-          <figcaption>Sunset at Vũng Tàu</figcaption>
-        </figure>
-        <figure>
-          <img src="hcm3.jpg" alt="Independence Palace, Ho Chi Minh City" loading="lazy">
-          <figcaption>Independence Palace, Ho Chi Minh City</figcaption>
-        </figure>
-        <figure>
-          <img src="hcm masoleum.jpg" alt="Ho Chi Minh's Mausoleum" loading="lazy">
-          <figcaption>Ho Chi Minh's Mausoleum</figcaption>
-        </figure>
-        <figure>
-          <img src="nhatrang.jpg" alt="VinPearl, Nha Trang" loading="lazy">
-          <figcaption>VinPearl, Nha Trang</figcaption>
-        </figure>
-        <figure>
-          <img src="hcm1.jpg" alt="Saigon Opera House" loading="lazy">
-          <figcaption>Saigon Opera House junction, HCMC</figcaption>
-        </figure>
-        <figure>
-          <img src="landmark81.jpg" alt="Landmark 81 Skyline" loading="lazy">
-          <figcaption>Landmark 81 Skyline</figcaption>
-        </figure>
-      </div>
-    </section>
-
-    <section id="interests" class="section-card">
-      <h2>Interests</h2>
-      <div class="grid two">
-        <div>
-          <h3>Design & tech</h3>
-          <p>Curious about everything, especially programming and visual design work.</p>
-        </div>
-        <div>
-          <h3>Learning & creativity</h3>
-          <ul class="bullets">
-            <li>Strategy games, Sudoku/Minesweeper</li>
-            <li>Other hobbies/yearning to learn: Adobe Photoshop, CSS, DaVinci Resolve Studio, etc</li>
-          </ul>
+        <div class="text-block">
+          <h1 class="morning-glory-title">WHAT'S THE STORY</h1>
+          <h2 class="morning-glory-sub">About Me</h2>
+          <div class="brick-line"></div>
+          <p class="body-text oasis-lyrics">
+            i hitched a ride with my soul by the side of the road<br>
+            just as the sky turned black<br>
+            i took a walk with my fame down memory lane<br>
+            i never did find my way back<br>
+            you know that i've gotta say time's slippin' away<br>
+            and what will it hold for me?<br>
+            what am i gonna do while i'm lookin' at you?<br>
+            you're standin' ignorin' me<br><br>
+            i thought that i heard someone say now<br>
+            there's no time for runnin' away now<br>
+            hey now, hey now
+          </p>
         </div>
       </div>
     </section>
 
-    <section id="contact" class="section-card">
-      <h2>Contact</h2>
-      <p>Email: <a href="mailto:kietmortar@gmail.com">kietmortar@gmail.com</a></p>
-      <p>Elsewhere: <a href="https://www.facebook.com/apokaliptics" rel="me">Facebook</a> · <a href="https://www.instagram.com/apoc_iypse/" rel="me">Instagram</a></p>
+    <!-- Section 2: Music Taste (Punk / Emo / MCR Three Cheers & Bullets) -->
+    <section id="taste" class="theme-punk section-content">
+      <div class="blood-spatter"></div>
+      <div class="content-wrapper punk-wrapper">
+        <h2 class="mcr-title">SWEET REVENGE</h2>
+        <p class="mcr-subtitle">MUSIC TASTE</p>
+
+        <div class="slashed-grid">
+          <!-- Playlist 1 -->
+          <div class="slash-card blooded">
+            <iframe style="border-radius:12px"
+              src="https://open.spotify.com/embed/playlist/41b2SzteSYd21jChRjdZdJ?utm_source=generator" width="100%"
+              height="352" frameBorder="0" allowfullscreen=""
+              allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+              loading="lazy"></iframe>
+          </div>
+          <!-- Playlist 2 -->
+          <div class="slash-card blooded" style="transform: translateY(20px);">
+            <iframe style="border-radius:12px"
+              src="https://open.spotify.com/embed/playlist/5nlfLOnW6GLqG2rbg8bBAm?utm_source=generator" width="100%"
+              height="352" frameBorder="0" allowfullscreen=""
+              allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+              loading="lazy"></iframe>
+          </div>
+          <!-- Playlist 3 -->
+          <div class="slash-card blooded" style="transform: translateY(-10px);">
+            <iframe style="border-radius:12px"
+              src="https://open.spotify.com/embed/playlist/683NDQxAOWDsQXYBNaGc6b?utm_source=generator" width="100%"
+              height="352" frameBorder="0" allowfullscreen=""
+              allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+              loading="lazy"></iframe>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 3: Photos (Classic Rock / Bowie Berlin Era - Low & Heroes & Lodger) -->
+    <section id="photos" class="theme-bowie section-content">
+      <div class="minimal-bars">
+        <div class="bar-orange"></div>
+      </div>
+      <div class="content-wrapper bowie-wrapper">
+        <div class="bowie-text">
+          <h2 class="berlin-title">SOUND AND VISION</h2>
+          <p class="berlin-sub">Photos / Analog Memories</p>
+        </div>
+
+        <div class="lodger-postcard-scatter">
+          <!-- Postcard 1 -->
+          <div class="lodger-postcard postcard-1" draggable="true">
+            <img src="hcm masoleum.jpg" class="postcard-img">
+            <div class="postcard-footer">
+              <div class="postcard-label">HCM MAUSOLEUM<br>POST CARD</div>
+              <div class="stamp-box"></div>
+            </div>
+            <div class="lodger-stamp stamp-1">LODGER</div>
+          </div>
+          <!-- Postcard 2 -->
+          <div class="lodger-postcard postcard-2" draggable="true">
+            <img src="hcm1.jpg" class="postcard-img">
+            <div class="postcard-footer">
+              <div class="postcard-label">HCM OPERA HOUSE<br>POST CARD</div>
+              <div class="stamp-box"></div>
+            </div>
+            <div class="lodger-stamp stamp-2">BOWIE</div>
+          </div>
+          <!-- Postcard 3 -->
+          <div class="lodger-postcard postcard-3" draggable="true">
+            <img src="hcm3.jpg" class="postcard-img">
+            <div class="postcard-footer">
+              <div class="postcard-label">INDEPENDENCE PALACE<br>POST CARD</div>
+              <div class="stamp-box"></div>
+            </div>
+            <div class="lodger-stamp stamp-5">HEROES</div>
+          </div>
+          <!-- Postcard 4 -->
+          <div class="lodger-postcard postcard-4" draggable="true">
+            <img src="landmark81.jpg" class="postcard-img">
+            <div class="postcard-footer">
+              <div class="postcard-label">LANDMARK 81<br>POST CARD</div>
+              <div class="stamp-box"></div>
+            </div>
+            <div class="lodger-stamp stamp-3">LODGER</div>
+          </div>
+          <!-- Postcard 5 -->
+          <div class="lodger-postcard postcard-5" draggable="true">
+            <img src="nhatrang.jpg" class="postcard-img">
+            <div class="postcard-footer">
+              <div class="postcard-label">NHA TRANG<br>POST CARD</div>
+              <div class="stamp-box"></div>
+            </div>
+            <div class="lodger-stamp stamp-4">BERLIN</div>
+          </div>
+          <!-- Postcard 6 -->
+          <div class="lodger-postcard postcard-6" draggable="true">
+            <img src="vungtau.jpg" class="postcard-img">
+            <div class="postcard-footer">
+              <div class="postcard-label">VUNG TAU<br>POST CARD</div>
+              <div class="stamp-box"></div>
+            </div>
+            <div class="lodger-stamp stamp-6">LOW</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 4: Projects & Misc (Prog Rock / The Wall) -->
+    <section id="projects" class="theme-wall section-content">
+      <div class="brick-texture-bg"></div>
+      <img src="the_wall_characters.jpg" class="the-wall-art" alt="The Wall Artwork">
+      <div class="content-wrapper wall-wrapper">
+        <div class="wall-textual-assault">
+          <h2 class="scarfe-title">TEAR DOWN THE WALL</h2>
+          <p class="scarfe-sub">PROJECTS AND MISC OUT THERE</p>
+        </div>
+
+        <div class="graffiti-grid">
+          <div class="graffiti-item">
+            <h4 class="blood-text">Brick</h4>
+          </div>
+          <div class="graffiti-item">
+            <h4 class="blood-text">Rebar</h4>
+          </div>
+          <div class="graffiti-item">
+            <h4 class="blood-text">Palisade</h4>
+          </div>
+        </div>
+
+      </div>
     </section>
   </main>
 
-  <footer class="wrap">
-    <small>© <span id="year"></span> Kiet — Built with plain HTML/CSS</small>
+  <footer class="site-footer">
+    <p>make by kiet minh - apokaliptics</p>
   </footer>
 
-  <script>
-    document.getElementById('year').textContent = new Date().getFullYear();
-  </script>
 </body>
+
 </html>

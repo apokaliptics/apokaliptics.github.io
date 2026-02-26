@@ -1,0 +1,712 @@
+/* Reset & Global Settings */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  overflow-x: hidden;
+}
+
+body {
+  background: #000;
+  color: #fff;
+  overflow-x: hidden;
+  font-family: 'Oswald', sans-serif;
+}
+
+/* Global Noise Overlay for grit */
+.noise-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.15;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.95' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+}
+
+/* Navigation */
+nav.navbar {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 40px;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.8);
+  border-bottom: 2px solid #333;
+}
+
+.logo-img {
+  height: 40px;
+  display: block;
+}
+
+.nav-links {
+  display: flex;
+  gap: 30px;
+  list-style: none;
+}
+
+.nav-links a {
+  color: #ddd;
+  text-decoration: none;
+  text-transform: lowercase;
+  font-family: 'Special Elite', monospace;
+  font-size: 1rem;
+  transition: color 0.3s;
+}
+
+.nav-links a:hover {
+  color: #cc0000;
+}
+
+/* Section Layout */
+.section-content {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  padding: 100px 5%;
+  position: relative;
+  overflow: hidden;
+}
+
+.content-wrapper {
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+  z-index: 5;
+  position: relative;
+}
+
+/* -------------------------------------
+   SECTION 1: BRITPOP (Morning Glory)
+   ------------------------------------- */
+.theme-britpop {
+  /* Cream -> warm lit street -> asphalt */
+  background: linear-gradient(180deg, #eaddce 0%, #c4af98 50%, #524d4a 100%);
+}
+
+.ripple-bg {
+  position: absolute;
+  top: 50%;
+  left: -200px;
+  transform: translateY(-50%);
+  width: 800px;
+  height: 800px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0.1) 40%, transparent 70%);
+  box-shadow:
+    0 0 0 30px rgba(255, 255, 255, 0.1),
+    0 0 0 80px rgba(255, 255, 255, 0.05),
+    0 0 0 160px rgba(255, 255, 255, 0.02);
+  animation: pulse-ripple 6s ease-in-out infinite alternate;
+  z-index: 1;
+  pointer-events: none;
+}
+
+@keyframes pulse-ripple {
+  0% {
+    transform: translateY(-50%) scale(0.8);
+    opacity: 0.6;
+  }
+
+  100% {
+    transform: translateY(-50%) scale(1.1);
+    opacity: 1;
+  }
+}
+
+.theme-britpop .text-block {
+  max-width: 800px;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 40px;
+  border-left: 5px solid #111;
+  backdrop-filter: blur(8px);
+}
+
+.morning-glory-title {
+  font-family: 'Anton', sans-serif;
+  font-size: 6rem;
+  letter-spacing: -2px;
+  color: #fff;
+  text-shadow: 2px 2px 15px rgba(0, 0, 0, 0.3);
+  line-height: 0.9;
+}
+
+.morning-glory-sub {
+  font-family: 'Cutive Mono', monospace;
+  font-size: 2rem;
+  color: #222;
+  margin-top: 10px;
+  margin-bottom: 30px;
+  text-shadow: 0px 0px 5px rgba(255, 255, 255, 0.5);
+}
+
+.brick-line {
+  width: 150px;
+  height: 8px;
+  background: repeating-linear-gradient(90deg, #333 0px, #333 20px, #000 20px, #000 24px);
+  margin-bottom: 30px;
+}
+
+.theme-britpop .body-text {
+  font-size: 1.3rem;
+  line-height: 1.6;
+  color: #111;
+  font-weight: 700;
+}
+
+.oasis-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 60px;
+}
+
+.oasis-portrait-frame {
+  background: #fdfbf7;
+  padding: 15px;
+  padding-bottom: 50px;
+  box-shadow: 10px 10px 30px rgba(0, 0, 0, 0.5);
+  transform: rotate(-3deg);
+  border: 1px solid #ddd;
+}
+
+.oasis-face-img {
+  width: 300px;
+  height: 300px;
+  object-fit: cover;
+  filter: grayscale(100%) contrast(1.2);
+  display: block;
+}
+
+.oasis-lyrics {
+  font-family: 'Comic Neue', cursive;
+  font-size: 1.25rem;
+  line-height: 1.4;
+  color: #111;
+  text-transform: lowercase;
+  font-weight: 700;
+}
+
+/* -------------------------------------
+   SECTION 2: PUNK / EMO (MCR Three Cheers)
+   ------------------------------------- */
+.theme-punk {
+  /* Asphalt -> stark pitch black -> blood red */
+  background: linear-gradient(180deg, #524d4a 0%, #050505 40%, #300000 80%, #660000 100%);
+}
+
+.blood-spatter {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  /* Simulating chaotic red splashes via radial gradients */
+  background:
+    radial-gradient(circle at 80% 80%, rgba(140, 0, 0, 0.4) 0%, transparent 40%),
+    radial-gradient(circle at 10% 20%, rgba(110, 0, 0, 0.6) 0%, transparent 20%),
+    radial-gradient(circle at 60% 40%, #000 0%, transparent 50%);
+  z-index: 1;
+  mix-blend-mode: multiply;
+}
+
+.punk-wrapper {
+  text-align: center;
+}
+
+.mcr-title {
+  font-family: 'Special Elite', monospace;
+  font-size: 5rem;
+  color: #000;
+  text-shadow: 2px 2px 0px #fff, -2px -2px 0px #cc0000;
+  transform: rotate(-3deg);
+  margin-bottom: 10px;
+}
+
+.mcr-subtitle {
+  font-family: 'Anton', sans-serif;
+  font-size: 2.5rem;
+  color: #fff;
+  background: #cc0000;
+  display: inline-block;
+  padding: 5px 20px;
+  transform: rotate(2deg);
+  margin-bottom: 60px;
+}
+
+.slashed-grid {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+}
+
+.slash-card {
+  padding: 40px;
+  max-width: 400px;
+  text-align: left;
+  position: relative;
+}
+
+.slash-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border: 4px solid #fff;
+  transform: rotate(3deg);
+  z-index: -1;
+  transition: transform 0.2s;
+}
+
+.slash-card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border: 2px dashed #cc0000;
+  transform: rotate(-2deg);
+  z-index: -1;
+}
+
+.slash-card:hover::before {
+  transform: rotate(-1deg);
+}
+
+.inverted {
+  background: #fff;
+  color: #000;
+}
+
+.inverted::before {
+  border-color: #000;
+}
+
+.blooded {
+  background: #0a0a0a;
+  color: #fff;
+}
+
+.blooded::before {
+  border-color: #cc0000;
+  background: rgba(200, 0, 0, 0.1);
+}
+
+.slash-card h3 {
+  font-family: 'Anton', sans-serif;
+  font-size: 3rem;
+  margin-bottom: 15px;
+  letter-spacing: 1px;
+}
+
+.slash-card p {
+  font-family: 'Cutive Mono', monospace;
+  font-size: 1.1rem;
+  line-height: 1.5;
+}
+
+/* -------------------------------------
+   SECTION 3: CLASSIC ROCK (Bowie Berlin Era)
+   ------------------------------------- */
+.theme-bowie {
+  /* Blood red -> cold slate grey transition */
+  background: linear-gradient(180deg, #660000 0%, #3a4149 40%, #7d8894 100%);
+  font-family: 'Burko', 'Permanent Marker', sans-serif;
+}
+
+.minimal-bars {
+  position: absolute;
+  top: 0;
+  left: 5%;
+  bottom: 0;
+  width: 40px;
+  border-left: 2px solid #aaa;
+  border-right: 2px solid #aaa;
+  z-index: 1;
+}
+
+.bar-orange {
+  position: absolute;
+  top: 30%;
+  left: 0;
+  width: 100%;
+  height: 200px;
+  background: #f75d22;
+  /* iconic Low orange */
+}
+
+.bowie-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-left: 80px;
+  /* clear the bars */
+}
+
+.bowie-text {
+  max-width: 500px;
+}
+
+.berlin-title {
+  font-family: 'Burko', 'Permanent Marker', sans-serif;
+  font-size: 5rem;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 5px;
+  line-height: 1.1;
+  margin-bottom: 10px;
+}
+
+.berlin-sub {
+  font-family: 'Burko', 'Permanent Marker', sans-serif;
+  color: #f75d22;
+  font-size: 2rem;
+  letter-spacing: 2px;
+}
+
+.lodger-postcard-scatter {
+  position: relative;
+  width: 650px;
+  height: 550px;
+}
+
+.lodger-postcard {
+  position: absolute;
+  background: #fdfae5;
+  padding: 12px;
+  width: 240px;
+  box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.6);
+  transition: transform 0.3s, z-index 0.3s;
+}
+
+.lodger-postcard:hover {
+  transform: scale(1.15) rotate(0deg) !important;
+  z-index: 100 !important;
+}
+
+.postcard-img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  border: 1px solid #ddd;
+  filter: sepia(0.3) contrast(1.2);
+}
+
+.postcard-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-top: 10px;
+}
+
+.postcard-label {
+  font-family: 'Cutive Mono', serif;
+  font-size: 0.75rem;
+  color: #111;
+  letter-spacing: 1px;
+  line-height: 1.4;
+}
+
+.stamp-box {
+  width: 35px;
+  height: 45px;
+  border: 1px dashed #666;
+}
+
+.lodger-stamp {
+  position: absolute;
+  font-family: 'Burko', 'Permanent Marker', sans-serif;
+  font-size: 2rem;
+  color: #000;
+  text-shadow: 1px 1px 0px #fff;
+  z-index: 5;
+  mix-blend-mode: multiply;
+  pointer-events: none;
+}
+
+.postcard-1 {
+  top: 10px;
+  left: 10px;
+  transform: rotate(-8deg);
+  z-index: 4;
+}
+
+.postcard-2 {
+  top: 40px;
+  left: 240px;
+  transform: rotate(12deg);
+  z-index: 2;
+}
+
+.postcard-3 {
+  top: 150px;
+  left: 80px;
+  transform: rotate(-4deg);
+  z-index: 3;
+}
+
+.postcard-4 {
+  top: 180px;
+  left: 320px;
+  transform: rotate(9deg);
+  z-index: 5;
+}
+
+.postcard-5 {
+  top: 280px;
+  left: 10px;
+  transform: rotate(-12deg);
+  z-index: 4;
+}
+
+.postcard-6 {
+  top: 310px;
+  left: 240px;
+  transform: rotate(6deg);
+  z-index: 6;
+}
+
+.stamp-1 {
+  top: -15px;
+  left: -10px;
+  transform: rotate(-15deg);
+}
+
+.stamp-2 {
+  top: 30%;
+  right: -20px;
+  transform: rotate(25deg);
+}
+
+.stamp-3 {
+  bottom: 20px;
+  left: -15px;
+  transform: rotate(-5deg);
+}
+
+.stamp-4 {
+  top: 50%;
+  left: -20px;
+  transform: rotate(-30deg);
+}
+
+.stamp-5 {
+  top: 10%;
+  right: -10px;
+  transform: rotate(15deg);
+}
+
+.stamp-6 {
+  bottom: 10px;
+  right: -5px;
+  transform: rotate(5deg);
+}
+
+/* -------------------------------------
+   SECTION 4: PROG ROCK (The Wall)
+   ------------------------------------- */
+.theme-wall {
+  /* Slate grey -> oppressive white brick wall */
+  background: linear-gradient(180deg, #7d8894 0%, #cccccc 40%, #f0f0f0 100%);
+}
+
+.brick-texture-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  /* CSS generated brick pattern */
+  background-color: #dfdfdf;
+  background-image:
+    linear-gradient(335deg, rgba(0, 0, 0, 0.1) 23px, transparent 23px),
+    linear-gradient(155deg, rgba(0, 0, 0, 0.1) 23px, transparent 23px),
+    linear-gradient(335deg, rgba(0, 0, 0, 0.1) 23px, transparent 23px),
+    linear-gradient(155deg, rgba(0, 0, 0, 0.1) 23px, transparent 23px);
+  background-size: 58px 58px;
+  background-position: 0px 2px, 4px 35px, 29px 31px, 34px 6px;
+  mix-blend-mode: multiply;
+  opacity: 0.6;
+  z-index: 1;
+}
+
+.the-wall-art {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  mix-blend-mode: multiply;
+  /* Blends the pure white background with the CSS bricks beneath it */
+  opacity: 0.85;
+  /* Ensures the ink isn't overpowering */
+  pointer-events: none;
+  z-index: 2;
+}
+
+.wall-wrapper {
+  text-align: center;
+}
+
+.wall-textual-assault {
+  margin-bottom: 80px;
+}
+
+.scarfe-title {
+  font-family: 'Permanent Marker', cursive;
+  font-size: 6rem;
+  color: #000;
+  text-shadow: 3px 3px 0 #fff;
+  /* Stark contrast */
+  transform: rotate(-2deg);
+}
+
+.scarfe-sub {
+  font-family: 'Permanent Marker', cursive;
+  font-size: 2rem;
+  color: #a30000;
+  /* Blood red */
+  transform: rotate(1deg);
+  margin-top: -20px;
+}
+
+.graffiti-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 40px;
+  position: relative;
+  z-index: 5;
+}
+
+.graffiti-item {
+  background: transparent;
+  padding: 30px;
+  border: 3px solid #000;
+  box-shadow: -10px 10px 0px rgba(0, 0, 0, 0.8);
+  transform: rotate(random);
+}
+
+.graffiti-item:nth-child(1) {
+  transform: rotate(-3deg);
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.graffiti-item:nth-child(2) {
+  transform: rotate(2deg);
+  background: rgba(0, 0, 0, 0.9);
+}
+
+.graffiti-item:nth-child(2) p {
+  color: #fff;
+}
+
+.graffiti-item:nth-child(3) {
+  transform: rotate(-1deg);
+  background: rgba(163, 0, 0, 0.9);
+  border-color: #fff;
+}
+
+.graffiti-item:nth-child(3) p {
+  color: #fff;
+}
+
+.blood-text {
+  font-family: 'Permanent Marker', cursive;
+  font-size: 1.8rem;
+  margin-bottom: 15px;
+  color: #a30000;
+}
+
+.graffiti-item:nth-child(2) .blood-text {
+  color: #fff;
+}
+
+.graffiti-item:nth-child(3) .blood-text {
+  color: #000;
+}
+
+.graffiti-item p {
+  font-family: 'Cutive Mono', monospace;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+/* -------------------------------------
+   FOOTER
+   ------------------------------------- */
+.site-footer {
+  background: #000;
+  color: #555;
+  text-align: center;
+  padding: 30px 20px;
+  font-family: 'Cutive Mono', monospace;
+  font-size: 0.9rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .morning-glory-title {
+    font-size: 4rem;
+  }
+
+  .mcr-title {
+    font-size: 3rem;
+  }
+
+  .berlin-title {
+    font-size: 3.5rem;
+  }
+
+  .scarfe-title {
+    font-size: 4rem;
+  }
+
+  .slashed-grid {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .bowie-wrapper {
+    flex-direction: column;
+    padding-left: 0;
+    text-align: center;
+  }
+
+  .minimal-bars {
+    display: none;
+  }
+
+  .avant-garde-gallery {
+    margin-top: 50px;
+    flex-direction: column;
+  }
+
+  .frame-1,
+  .frame-2 {
+    transform: none;
+  }
+
+  .graffiti-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .nav-links {
+    display: none;
+  }
+}
