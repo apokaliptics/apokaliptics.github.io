@@ -68,6 +68,42 @@ nav.navbar {
   color: #cc0000;
 }
 
+/* Header Volume Control */
+.header-volume {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 5px 15px;
+  border-radius: 20px;
+}
+
+.volume-icon {
+  font-size: 1.2rem;
+  color: #fff;
+  cursor: pointer;
+}
+
+#volume-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 80px;
+  height: 4px;
+  background: #555;
+  border-radius: 2px;
+  outline: none;
+}
+
+#volume-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #cc0000;
+  cursor: pointer;
+}
+
 /* Section Layout */
 .section-content {
   width: 100%;
@@ -661,8 +697,51 @@ nav.navbar {
 
 /* Responsive */
 @media (max-width: 900px) {
+  nav.navbar {
+    padding: 10px 20px;
+    flex-wrap: wrap;
+    justify-content: space-between;
+  }
+
+  .header-volume {
+    margin-left: auto;
+    margin-right: 15px;
+    /* space before hamburger or just right aligned */
+  }
+
+  .oasis-wrapper {
+    flex-direction: column;
+    text-align: center;
+    gap: 30px;
+  }
+
+  .oasis-portrait-frame {
+    margin: 0 auto;
+    width: 250px;
+    padding-bottom: 20px;
+  }
+
+  .oasis-face-img {
+    width: 100%;
+    height: auto;
+  }
+
+  .theme-britpop .text-block {
+    padding: 20px;
+    border-left: none;
+    border-top: 5px solid #111;
+  }
+
+  .brick-line {
+    margin: 0 auto 30px auto;
+  }
+
+  .ripple-bg {
+    display: none;
+  }
+
   .morning-glory-title {
-    font-size: 4rem;
+    font-size: 3rem;
   }
 
   .mcr-title {

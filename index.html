@@ -22,6 +22,13 @@
   <!-- Navigation -->
   <nav class="navbar">
     <a href="#" class="logo-link"><img src="brick-logo.png" alt="Brick Logo" class="logo-img"></a>
+
+    <!-- Volume Control -->
+    <div class="header-volume">
+      <span class="volume-icon" id="volume-icon">🔊</span>
+      <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="1">
+    </div>
+
     <ul class="nav-links">
       <li><a href="#about">About</a></li>
       <li><a href="#taste">Taste</a></li>
@@ -194,6 +201,53 @@
   <footer class="site-footer">
     <p>make by kiet minh - apokaliptics</p>
   </footer>
+
+  <!-- Default Page Background Song -->
+  <audio id="bg-music" src="My Chemical Romance - Vampires Will Never Hurt You.flac" autoplay loop
+    style="display: none;"></audio>
+
+  <script>
+    const bgMusic = document.getElementById('bg-music');
+    const volumeSlider = document.getElementById('volume-slider');
+    const volumeIcon = document.getElementById('volume-icon');
+
+    // Sync initial volume
+    bgMusic.volume = volumeSlider.value;
+
+    volumeSlider.addEventListener('input', (e) => {
+      const val = parseFloat(e.target.value);
+      bgMusic.volume = val;
+      if (val === 0) {
+        volumeIcon.textContent = '🔇';
+      } else if (val < 0.5) {
+        volumeIcon.textContent = '🔉';
+      } else {
+        volumeIcon.textContent = '🔊';
+      }
+    });
+
+    // Mute/unmute on icon click
+    volumeIcon.addEventListener('click', () => {
+      if (bgMusic.volume > 0) {
+        bgMusic.dataset.lastVolume = bgMusic.volume;
+        volumeSlider.value = 0;
+        bgMusic.volume = 0;
+        volumeIcon.textContent = '🔇';
+      } else {
+        const lastVol = bgMusic.dataset.lastVolume || 1;
+        volumeSlider.value = lastVol;
+        bgMusic.volume = lastVol;
+        volumeIcon.textContent = lastVol < 0.5 ? '🔉' : '🔊';
+      }
+    });
+
+    // Play on first interaction if blocked
+    document.body.addEventListener('click', () => {
+      if (bgMusic.paused) {
+        bgMusic.play().catch(console.error);
+      }
+    }, { once: true });
+  </script>
 
 </body>
 
