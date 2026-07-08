@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount, onDestroy } from 'svelte';
+  import { onMount, onDestroy, untrack } from 'svelte';
 
   // Props in Svelte 5
   interface Props {
@@ -42,19 +42,26 @@
         };
       }
     });
-    ctx = canvas?.getContext('2d') || null;
-    triggerRender();
   });
 
   onDestroy(() => {
     stopStatic();
   });
 
-  // Re-run render when power or channel changes
+  // Reactively obtain the 2D context whenever the canvas element becomes available
   $effect(() => {
-    if (tvPower || tvChannel) {
+    if (canvas && !ctx) {
+      ctx = canvas.getContext('2d');
       triggerRender();
     }
+  });
+
+  // Re-run render when power or channel changes
+  // Read both values explicitly so Svelte tracks them as dependencies
+  $effect(() => {
+    const _power = tvPower;
+    const _channel = tvChannel;
+    triggerRender();
   });
 
   function triggerRender() {
@@ -68,7 +75,7 @@
 
     if (!tvPower) {
       stopStatic();
-      onTextureUpdate();
+      untrack(() => onTextureUpdate());
       return;
     }
 
@@ -191,7 +198,7 @@
           currentCtx.fillText(line, currentCanvas.width / 2, currentCanvas.height / 2 - 40 + i * 25);
         });
       }
-      onTextureUpdate();
+      untrack(() => onTextureUpdate());
     }
   }
 

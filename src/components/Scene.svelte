@@ -2,25 +2,61 @@
   import { Canvas, T } from '@threlte/core';
   import { OrbitControls } from '@threlte/extras';
   import Room from './Room.svelte';
+  import CameraController from './CameraController.svelte';
 
   interface Props {
     tvPower: boolean;
     tvChannel: number;
     canvasElement: HTMLCanvasElement | null;
     textureUpdateTrigger: number;
-    cameraMode: 'room' | 'tv';
+    cameraMode: 'free' | 'poem' | 'piano' | 'telephone' | 'tv';
+    bookCanvasElement: HTMLCanvasElement | null;
+    sheetCanvasElement: HTMLCanvasElement | null;
+    bookTextureTrigger: number;
+    sheetTextureTrigger: number;
+    onBookClick?: () => void;
+    onSheetClick?: () => void;
+    onTelephoneClick?: () => void;
+    onTVClick?: () => void;
   }
-  let { tvPower, tvChannel, canvasElement, textureUpdateTrigger, cameraMode }: Props = $props();
+  let { 
+    tvPower, 
+    tvChannel, 
+    canvasElement, 
+    textureUpdateTrigger, 
+    cameraMode,
+    bookCanvasElement,
+    sheetCanvasElement,
+    bookTextureTrigger,
+    sheetTextureTrigger,
+    onBookClick,
+    onSheetClick,
+    onTelephoneClick,
+    onTVClick
+  }: Props = $props();
 
-  let cameraPosition = $state<[number, number, number]>([5, 4, 7]);
-  let cameraTarget = $state<[number, number, number]>([0, 0.5, 0]);
+  let cameraPosition = $state<[number, number, number]>([0.3, 0.85, 1.3]);
+  let cameraTarget = $state<[number, number, number]>([0.3, 0.29, 1.75]);
+
+  let camera = $state<any>(null);
+  let controls = $state<any>(null);
 
   // Adjust camera position and controls look-at target based on viewing mode
   $effect(() => {
-    if (cameraMode === 'tv') {
-      cameraPosition = [0, 0.75, -0.6];
-      cameraTarget = [0, 0.75, -1.8];
-    } else {
+    if (cameraMode === 'poem') {
+      cameraPosition = [0.3, 0.85, 1.3];
+      cameraTarget = [0.3, 0.29, 1.75];
+    } else if (cameraMode === 'piano') {
+      cameraPosition = [-2.9, 1.08, -1.7];
+      cameraTarget = [-3.16, 0.92, -2.46];
+    } else if (cameraMode === 'telephone') {
+      // Inside the booth — eye height near the door side, looking at the phone shelf
+      cameraPosition = [-2.5, 1.62, 2.38];
+      cameraTarget = [-2.68, 0.9, 2.55];
+    } else if (cameraMode === 'tv') {
+      cameraPosition = [0.0, 0.95, 1.55];
+      cameraTarget = [0.0, 0.95, -1.39];
+    } else { // 'free'
       cameraPosition = [4.5, 3.8, 6.5];
       cameraTarget = [0, 0.5, 0.2];
     }
@@ -31,15 +67,15 @@
   <Canvas shadows>
     <T.PerspectiveCamera
       makeDefault
-      position={cameraPosition}
+      bind:ref={camera}
       fov={45}
       near={0.1}
       far={100}
     >
       <OrbitControls
+        bind:ref={controls}
         enableDamping
         dampingFactor={0.05}
-        target={cameraTarget}
         minDistance={1.2}
         maxDistance={12}
         maxPolarAngle={Math.PI / 2 - 0.05}
@@ -75,7 +111,25 @@
       {tvChannel}
       {canvasElement}
       {textureUpdateTrigger}
+      {bookCanvasElement}
+      {sheetCanvasElement}
+      {bookTextureTrigger}
+      {sheetTextureTrigger}
+      {onBookClick}
+      {onSheetClick}
+      {onTelephoneClick}
+      {onTVClick}
     />
+
+    {#if camera && controls}
+      <CameraController
+        {camera}
+        {controls}
+        {cameraPosition}
+        {cameraTarget}
+        {cameraMode}
+      />
+    {/if}
   </Canvas>
 </div>
 

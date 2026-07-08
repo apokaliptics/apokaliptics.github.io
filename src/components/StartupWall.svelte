@@ -167,26 +167,25 @@
 
 {#if !assetsLoaded}
 	<!-- Loading placeholder -->
-	<div class="fixed inset-0 bg-black" style="z-index: 9999;"></div>
+	<div class="loading-placeholder"></div>
 {:else}
 	<!-- Main wall container -->
 	<div
-		class="fixed inset-0 overflow-hidden"
+		class="wall-container"
 		class:startup-shake={shaking}
 		style="perspective: 1000px; z-index: 9999;"
 	>
 		<!-- Solid black background -->
 		<div
-			class="absolute inset-0 transition-opacity duration-300"
+			class="bg-overlay"
 			class:opacity-0={bgTransparent}
-			style="background-color: #000000;"
 		></div>
 
 		<!-- Brick masonry layer -->
-		<div class="absolute inset-0" style="z-index: 1;">
+		<div class="bricks-layer" style="z-index: 1;">
 			{#each brickLayout as brick (brick.id)}
 				<div
-					class="absolute brick-element"
+					class="brick-element"
 					class:brick-collapse={collapseBricks}
 					style="
 						left: {brick.x}px;
@@ -212,44 +211,42 @@
 		<!-- Logo impact -->
 		{#if showLogo}
 			<div
-				class="absolute inset-0 flex items-center justify-center"
+				class="logo-impact-container"
 				class:logo-collapse={collapseBricks}
 				style="transform-style: preserve-3d; z-index: 2;"
 				in:scale={{ duration: 300, start: 1.6, easing: cubicOut }}
 			>
-				<div class="relative">
+				<div class="logo-wrapper">
 					<img
 						src={brickLogoPng}
 						alt="BRICK"
-						class="w-96 h-96 object-contain"
+						class="logo-image"
 						style="filter: drop-shadow(0 20px 40px rgba(0,0,0,0.8)) drop-shadow(0 0 20px rgba(0,0,0,0.5));"
 					/>
 					<!-- Audio engine status -->
 					<div
-						class="absolute left-1/2 -translate-x-1/2 text-center"
+						class="audio-status-container"
 						style="top: calc(100% + 20px); white-space: nowrap;"
 						in:fade={{ delay: 300, duration: 300 }}
 					>
 						{#if audioStatus.strictMode && !audioStatus.hasBitPerfectDevice}
-							<div class="text-amber-400 text-sm font-medium">
+							<div class="status-warning">
 								<span
-									class="inline-block w-2 h-2 bg-amber-400 rounded-full mr-2 animate-pulse"
+									class="status-indicator warning animate-pulse"
 								></span>
 								No bit-perfect capable device detected
 							</div>
 						{:else if audioStatus.hasBitPerfectDevice}
-							<div class="text-emerald-400 text-sm opacity-70">
-								<span class="inline-block w-2 h-2 bg-emerald-400 rounded-full mr-2"></span>
-								<span style="font-family: 'Chakra Petch', 'Syne', sans-serif; font-weight: 700;">
+							<div class="status-ready device">
+								<span class="status-indicator ready"></span>
+								<span class="device-name">
 									{audioStatus.deviceName ?? 'Audio Ready'}
 								</span>
 							</div>
 						{:else}
-							<div class="text-gray-400 text-sm opacity-50">
-								<span class="inline-block w-2 h-2 bg-gray-400 rounded-full mr-2"></span>
-								<span style="font-family: 'Chakra Petch', 'Syne', sans-serif; font-weight: 700;"
-									>Audio Ready</span
-								>
+							<div class="status-ready">
+								<span class="status-indicator ready"></span>
+								<span class="ready-text">Audio Ready</span>
 							</div>
 						{/if}
 					</div>
@@ -262,7 +259,7 @@
 			{#each particles as particle (particle.id)}
 				{@const radians = (particle.angle * Math.PI) / 180}
 				<div
-					class="absolute bg-gray-400 rounded-full particle-burst"
+					class="particle-element particle-burst"
 					style="
 						left: 50%;
 						top: 50%;
@@ -279,8 +276,50 @@
 {/if}
 
 <style>
+	.loading-placeholder {
+		position: fixed;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		left: 0;
+		background-color: #000000;
+		z-index: 9999;
+	}
+
+	.wall-container {
+		position: fixed;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		left: 0;
+		overflow: hidden;
+	}
+
+	.bg-overlay {
+		position: absolute;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		left: 0;
+		background-color: #000000;
+		transition: opacity 300ms;
+	}
+
+	.bg-overlay.opacity-0 {
+		opacity: 0;
+	}
+
+	.bricks-layer {
+		position: absolute;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		left: 0;
+	}
+
 	/* Brick entrance animation */
 	.brick-element {
+		position: absolute;
 		animation: brick-fall 0.4s cubic-bezier(0.4, 0, 0.2, 1) both;
 	}
 
@@ -350,5 +389,90 @@
 			transform: translate(var(--end-x), var(--end-y)) scale(0);
 			opacity: 0;
 		}
+	}
+
+	.logo-impact-container {
+		position: absolute;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		left: 0;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.logo-wrapper {
+		position: relative;
+	}
+
+	.logo-image {
+		width: 24rem;
+		height: 24rem;
+		object-fit: contain;
+	}
+
+	.audio-status-container {
+		position: absolute;
+		left: 50%;
+		transform: translateX(-50%);
+		text-align: center;
+	}
+
+	.status-warning {
+		color: #fbbf24;
+		font-size: 0.875rem;
+		font-weight: 500;
+	}
+
+	.status-ready {
+		color: #9ca3af;
+		font-size: 0.875rem;
+		opacity: 0.5;
+	}
+
+	.status-ready.device {
+		color: #34d399;
+		opacity: 0.7;
+	}
+
+	.status-indicator {
+		display: inline-block;
+		width: 0.5rem;
+		height: 0.5rem;
+		border-radius: 9999px;
+		margin-right: 0.5rem;
+	}
+
+	.status-indicator.warning {
+		background-color: #fbbf24;
+	}
+
+	.status-indicator.ready {
+		background-color: #34d399;
+	}
+
+	.status-ready:not(.device) .status-indicator.ready {
+		background-color: #9ca3af;
+	}
+
+	.device-name, .ready-text {
+		font-family: 'Chakra Petch', 'Syne', sans-serif;
+		font-weight: 700;
+	}
+
+	@keyframes pulse {
+		0%, 100% { opacity: 1; }
+		50% { opacity: .5; }
+	}
+
+	.animate-pulse {
+		animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+	}
+
+	.particle-element {
+		position: absolute;
+		background-color: #9ca3af;
+		border-radius: 9999px;
 	}
 </style>

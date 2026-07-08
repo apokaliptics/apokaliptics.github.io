@@ -1,19 +1,30 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
-  import { fade, scale } from 'svelte/transition';
+  import { onDestroy, onMount } from 'svelte';
+  import { fade } from 'svelte/transition';
   import StartupWall from './components/StartupWall.svelte';
   import Scene from './components/Scene.svelte';
   import TVContent from './components/TVContent.svelte';
 
+  import BookContent from './components/BookContent.svelte';
+  import SheetContent from './components/SheetContent.svelte';
+
+  const musicUrl = new URL('../03 Nobody Home.mp3', import.meta.url).href;
+
   // Svelte 5 reactive states
   let introCompleted = $state(false);
-  let activePopup = $state<'welcome' | 'projects' | 'taste' | null>(null);
-  let cameraMode = $state<'room' | 'tv'>('room');
+  let showWallIntro = $state(false);
+  let showApp = $state(false);
+  let cameraMode = $state<'free' | 'poem' | 'piano' | 'telephone' | 'tv'>('poem');
   
   let tvPower = $state(false);
   let tvChannel = $state(1);
   let canvasElement = $state<HTMLCanvasElement | null>(null);
   let textureUpdateTrigger = $state(0);
+
+  let bookCanvasElement = $state<HTMLCanvasElement | null>(null);
+  let sheetCanvasElement = $state<HTMLCanvasElement | null>(null);
+  let bookTextureTrigger = $state(0);
+  let sheetTextureTrigger = $state(0);
 
   // Audio state
   let musicAudio = $state<HTMLAudioElement | null>(null);
@@ -23,16 +34,48 @@
 
   // TV Controls dial state
   let knobRotation = $state(0);
+  let introTimer: ReturnType<typeof setTimeout> | null = null;
 
   onMount(() => {
-    musicAudio = new Audio('/10 One Of My Turns.mp3');
+    musicAudio = new Audio(musicUrl);
     musicAudio.loop = true;
     musicAudio.volume = musicVolume;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Ignore key events if focused on input elements (like the volume slider)
+      if (document.activeElement?.tagName === 'INPUT') return;
+
+      if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
+        nextCamera();
+      } else if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
+        prevCamera();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  });
+
+  onDestroy(() => {
+    if (introTimer) {
+      clearTimeout(introTimer);
+    }
   });
 
   function handleIntroComplete() {
     introCompleted = true;
-    playMusic();
+    showWallIntro = true;
+
+    if (introTimer) {
+      clearTimeout(introTimer);
+    }
+
+    introTimer = setTimeout(() => {
+      showWallIntro = false;
+      showApp = true;
+      playMusic();
+    }, 2200);
   }
 
   function playMusic() {
@@ -81,12 +124,28 @@
     textureUpdateTrigger += 1;
   }
 
-  function closePopup() {
-    activePopup = null;
+  const cameras: Array<'free' | 'poem' | 'piano' | 'telephone' | 'tv'> = ['free', 'poem', 'piano', 'telephone', 'tv'];
+
+  function nextCamera() {
+    const idx = cameras.indexOf(cameraMode);
+    cameraMode = cameras[(idx + 1) % cameras.length];
   }
 
-  function openPopup(type: 'welcome' | 'projects' | 'taste') {
-    activePopup = type;
+  function prevCamera() {
+    const idx = cameras.indexOf(cameraMode);
+    cameraMode = cameras[(idx - 1 + cameras.length) % cameras.length];
+  }
+
+  function selectCamera(mode: 'free' | 'poem' | 'piano' | 'telephone' | 'tv') {
+    cameraMode = mode;
+  }
+
+  function triggerBookUpdate() {
+    bookTextureTrigger += 1;
+  }
+
+  function triggerSheetUpdate() {
+    sheetTextureTrigger += 1;
   }
 
   function toggleTVPower() {
@@ -108,7 +167,13 @@
 
 {#if !introCompleted}
   <StartupWall onComplete={handleIntroComplete} />
-{:else}
+{:else if showWallIntro}
+  <div class="wall-intro" transition:fade={{ duration: 500 }}>
+    <div class="wall-intro-card">
+      <span>welcome to my wall</span>
+    </div>
+  </div>
+{:else if showApp}
   <div class="app-main" transition:fade={{ duration: 400 }}>
     <!-- 3D Canvas Background -->
     <Scene
@@ -117,14 +182,30 @@
       {canvasElement}
       {textureUpdateTrigger}
       {cameraMode}
+      {bookCanvasElement}
+      {sheetCanvasElement}
+      {bookTextureTrigger}
+      {sheetTextureTrigger}
+      onBookClick={() => selectCamera('poem')}
+      onSheetClick={() => selectCamera('piano')}
+      onTelephoneClick={() => selectCamera('telephone')}
+      onTVClick={() => selectCamera('tv')}
     />
 
-    <!-- Offscreen canvas drawer -->
+    <!-- Offscreen canvas drawers -->
     <TVContent
       {tvPower}
       {tvChannel}
       bind:canvas={canvasElement}
       onTextureUpdate={triggerTextureUpdate}
+    />
+    <BookContent
+      bind:canvas={bookCanvasElement}
+      onTextureUpdate={triggerBookUpdate}
+    />
+    <SheetContent
+      bind:canvas={sheetCanvasElement}
+      onTextureUpdate={triggerSheetUpdate}
     />
 
     <!-- Top Navigation Bar HUD -->
@@ -134,16 +215,25 @@
       </a>
 
       <ul class="nav-links">
-        <li><button onclick={() => openPopup('welcome')} class:active={activePopup === 'welcome'}>Welcome</button></li>
-        <li><button onclick={() => openPopup('projects')} class:active={activePopup === 'projects'}>Projects</button></li>
-        <li><button onclick={() => openPopup('taste')} class:active={activePopup === 'taste'}>Taste</button></li>
+        <li><button onclick={() => selectCamera('poem')} class:active={cameraMode === 'poem'}>Welcome</button></li>
+        <li><button onclick={() => selectCamera('tv')} class:active={cameraMode === 'tv'}>Projects</button></li>
+        <li><button onclick={() => selectCamera('piano')} class:active={cameraMode === 'piano'}>Music</button></li>
+        <li><button onclick={() => selectCamera('telephone')} class:active={cameraMode === 'telephone'}>Telephone</button></li>
       </ul>
 
       <div class="controls-right">
-        <!-- Zoom focus toggler -->
-        <button class="view-toggle-btn" onclick={() => cameraMode = cameraMode === 'room' ? 'tv' : 'room'}>
-          {cameraMode === 'room' ? '[ ZOOM TO TV ]' : '[ VIEW ROOM ]'}
-        </button>
+        <!-- Camera tour controls -->
+        <div class="camera-tour-controls">
+          <button class="tour-btn" onclick={prevCamera} aria-label="Previous camera">&lt;</button>
+          <span class="tour-label">
+            {cameraMode === 'free' ? 'FREE VIEW' :
+             cameraMode === 'poem' ? 'POEM CAM' :
+             cameraMode === 'piano' ? 'PIANO CAM' :
+             cameraMode === 'telephone' ? 'TELEPHONE CAM' :
+             'TV CAM'}
+          </span>
+          <button class="tour-btn" onclick={nextCamera} aria-label="Next camera">&gt;</button>
+        </div>
 
         <!-- Volume controller -->
         <div class="volume-container">
@@ -187,8 +277,7 @@
 
       <!-- Quick select channel grids -->
       <div class="hud-channel-grid">
-        {#each Array.from({length: 13}) as _, idx}
-          {@const chanNum = idx + 1}
+        {#each Array.from({ length: 13 }, (_, idx) => idx + 1) as chanNum (chanNum)}
           <button class="hud-channel-btn" class:active={tvChannel === chanNum && tvPower} onclick={() => setChannel(chanNum)}>
             {chanNum}
           </button>
@@ -196,77 +285,7 @@
       </div>
     </div>
 
-    <!-- Svelte popups overlay (modal pages) -->
-    {#if activePopup}
-      <div class="modal-overlay" onclick={closePopup} transition:fade={{ duration: 150 }} role="button" tabindex="0" onkeydown={(e) => { if (e.key === 'Escape' || e.key === 'Enter') closePopup(); }} aria-label="Close modal overlay">
-        <div class="modal-card" onclick={(e) => e.stopPropagation()} transition:scale={{ duration: 250, start: 0.95 }} role="document">
-          <button class="modal-close-btn" onclick={closePopup}>[X] CLOSE</button>
 
-          {#if activePopup === 'welcome'}
-            <div class="welcome-modal-content">
-              <div class="profile-frame">
-                <img src="/My Wall (red).png" alt="My Wall Red Profile" class="profile-img">
-              </div>
-              <div class="welcome-textual">
-                <h1 class="scarfe-title">WELCOME TO MY WALL</h1>
-                <p class="scarfe-sub">ANALOG MEMORIES & STORIES</p>
-              </div>
-            </div>
-          {:else if activePopup === 'projects'}
-            <div class="projects-modal-content">
-              <div class="wall-textual-assault">
-                <h2 class="scarfe-title">TEAR DOWN THE WALL</h2>
-                <p class="scarfe-sub">PROJECTS AND MISC OUT THERE</p>
-              </div>
-              <div class="graffiti-grid">
-                <div class="graffiti-item">
-                  <h4 class="blood-text">Brick</h4>
-                  <p>Music visualizer and player built with Svelte, Three.js, and advanced audio rendering capabilities.</p>
-                </div>
-                <div class="graffiti-item">
-                  <h4 class="blood-text">Rebar</h4>
-                  <p>Custom Svelte design system foundation and structural UI layout utility framework.</p>
-                </div>
-                <div class="graffiti-item">
-                  <h4 class="blood-text">Palisade</h4>
-                  <p>Secure credentials tunnel proxy and gateway management framework.</p>
-                </div>
-              </div>
-            </div>
-          {:else if activePopup === 'taste'}
-            <div class="taste-modal-content">
-              <div class="wall-textual-assault">
-                <h2 class="scarfe-title">MUSIC TASTE</h2>
-                <p class="scarfe-sub">TUNES PLAYED OVER THE BRICKS</p>
-              </div>
-              <div class="spotify-grid">
-                <div class="brick-card brick-card-1">
-                  <iframe title="Spotify Playlist 1" style="border-radius:0px; border:none;"
-                    src="https://open.spotify.com/embed/playlist/5nlfLOnW6GLqG2rbg8bBAm?utm_source=generator" width="100%"
-                    height="352" allowfullscreen={true}
-                    allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-                    loading="lazy"></iframe>
-                </div>
-                <div class="brick-card brick-card-2">
-                  <iframe title="Spotify Playlist 2" style="border-radius:0px; border:none;"
-                    src="https://open.spotify.com/embed/playlist/5nlfLOnW6GLqG2rbg8bBAm?utm_source=generator" width="100%"
-                    height="352" allowfullscreen={true}
-                    allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-                    loading="lazy"></iframe>
-                </div>
-                <div class="brick-card brick-card-3">
-                  <iframe title="Spotify Playlist 3" style="border-radius:0px; border:none;"
-                    src="https://open.spotify.com/embed/playlist/683NDQxAOWDsQXYBNaGc6b?utm_source=generator" width="100%"
-                    height="352" allowfullscreen={true}
-                    allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-                    loading="lazy"></iframe>
-                </div>
-              </div>
-            </div>
-          {/if}
-        </div>
-      </div>
-    {/if}
 
     <footer class="site-credit">
       MAKE BY KIET MINH - TARGET APOKALIPTICS
@@ -289,6 +308,28 @@
     height: 100vh;
     position: relative;
     overflow: hidden;
+  }
+
+  .wall-intro {
+    width: 100vw;
+    height: 100vh;
+    display: grid;
+    place-items: center;
+    background: rgba(0, 0, 0, 0.78);
+    color: #f4f0e8;
+    text-transform: lowercase;
+    letter-spacing: 0.22em;
+    font-family: 'Permanent Marker', cursive;
+  }
+
+  .wall-intro-card {
+    padding: 22px 34px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: rgba(0, 0, 0, 0.36);
+    box-shadow: 0 0 60px rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(2px);
+    font-size: clamp(1.8rem, 3vw, 3.1rem);
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.6);
   }
 
   /* Navbar overlay styling */
@@ -355,23 +396,43 @@
     gap: 20px;
   }
 
-  .view-toggle-btn {
+  .camera-tour-controls {
+    display: flex;
+    align-items: center;
     background: #000;
-    color: #00ff66;
     border: 2px solid #00ff66;
-    font-family: 'Special Elite', monospace;
-    font-size: 0.9rem;
-    padding: 6px 12px;
-    cursor: pointer;
     box-shadow: 3px 3px 0px #000;
+    overflow: hidden;
+  }
+
+  .tour-btn {
+    background: transparent;
+    border: none;
+    color: #00ff66;
+    font-family: 'Special Elite', monospace;
+    font-size: 1.1rem;
+    font-weight: bold;
+    padding: 6px 14px;
+    cursor: pointer;
     transition: all 0.2s;
   }
 
-  .view-toggle-btn:hover {
+  .tour-btn:hover {
+    background: #00ff66;
+    color: #000;
+  }
+
+  .tour-label {
     color: #fff;
-    border-color: #fff;
-    transform: translate(1px, 1px);
-    box-shadow: 2px 2px 0px #000;
+    font-family: 'Special Elite', monospace;
+    font-size: 0.9rem;
+    padding: 0 16px;
+    letter-spacing: 1px;
+    border-left: 1px solid rgba(0, 255, 102, 0.3);
+    border-right: 1px solid rgba(0, 255, 102, 0.3);
+    user-select: none;
+    min-width: 90px;
+    text-align: center;
   }
 
   /* Audio sliders */
@@ -573,207 +634,6 @@
     text-shadow: 0 0 3px #fff;
   }
 
-  /* Modal overlay and popups */
-  .modal-overlay {
-    position: absolute;
-    top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0, 0, 0, 0.82);
-    backdrop-filter: blur(5px);
-    z-index: 100;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 20px;
-    box-sizing: border-box;
-  }
-
-  .modal-card {
-    background: #fff;
-    border: 6px solid #000;
-    box-shadow: 15px 15px 0px #000;
-    max-width: 900px;
-    width: 100%;
-    max-height: 80vh;
-    overflow-y: auto;
-    position: relative;
-    padding: 40px;
-    box-sizing: border-box;
-    border-radius: 4px;
-    background-image: radial-gradient(rgba(0,0,0,0.05) 1px, transparent 1px);
-    background-size: 15px 15px;
-  }
-
-  .modal-close-btn {
-    position: absolute;
-    top: 15px;
-    right: 15px;
-    background: #cc0000;
-    color: #fff;
-    border: 3px solid #000;
-    padding: 4px 12px;
-    font-family: 'Special Elite', monospace;
-    font-size: 0.85rem;
-    font-weight: bold;
-    cursor: pointer;
-    box-shadow: 3px 3px 0px #000;
-    transition: all 0.2s;
-  }
-
-  .modal-close-btn:hover {
-    transform: translate(1px, 1px);
-    box-shadow: 1px 1px 0px #000;
-    background: #ff3333;
-  }
-
-  /* Welcome Card inside Modal */
-  .welcome-modal-content {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 50px;
-    padding: 20px 0;
-  }
-
-  .profile-frame {
-    background: #fdfbf7;
-    padding: 15px;
-    padding-bottom: 40px;
-    box-shadow: 10px 10px 0px #000;
-    transform: rotate(-2deg);
-    border: 4px solid #000;
-    transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s;
-  }
-
-  .profile-frame:hover {
-    transform: scale(1.02) rotate(1deg);
-    box-shadow: 12px 12px 0px #cc0000;
-    border-color: #cc0000;
-  }
-
-  .profile-img {
-    width: 250px;
-    height: 250px;
-    object-fit: cover;
-    border: 3px solid #000;
-    display: block;
-  }
-
-  .welcome-textual {
-    text-align: left;
-  }
-
-  .scarfe-title {
-    font-family: 'Permanent Marker', cursive;
-    font-size: 3.8rem;
-    color: #000;
-    text-shadow: 2px 2px 0 #fff;
-    transform: rotate(-2deg);
-    margin: 0;
-  }
-
-  .scarfe-sub {
-    font-family: 'Permanent Marker', cursive;
-    font-size: 1.4rem;
-    color: #a30000;
-    transform: rotate(1deg);
-    margin: 5px 0 0 0;
-  }
-
-  /* Projects Card inside Modal */
-  .projects-modal-content {
-    text-align: center;
-  }
-
-  .wall-textual-assault {
-    margin-bottom: 40px;
-  }
-
-  .graffiti-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 30px;
-  }
-
-  .graffiti-item {
-    background: transparent;
-    padding: 25px;
-    border: 3px solid #000;
-    box-shadow: -8px 8px 0px rgba(0, 0, 0, 0.85);
-    text-align: left;
-    transition: all 0.3s;
-  }
-
-  .graffiti-item p {
-    font-family: 'Cutive Mono', monospace;
-    font-size: 0.95rem;
-    line-height: 1.4;
-    margin: 10px 0 0 0;
-  }
-
-  .graffiti-item:hover {
-    transform: scale(1.04) rotate(0deg) !important;
-    box-shadow: 0px 0px 20px rgba(255, 255, 0, 0.85), -8px 8px 0px rgba(0,0,0,0.85) !important;
-  }
-
-  .graffiti-item:nth-child(1) {
-    transform: rotate(-2deg);
-    background: rgba(255, 255, 255, 0.9);
-  }
-  .graffiti-item:nth-child(1):hover { background: #fff !important; }
-
-  .graffiti-item:nth-child(2) {
-    transform: rotate(2deg);
-    background: rgba(15, 15, 15, 0.95);
-    border-color: #000;
-  }
-  .graffiti-item:nth-child(2):hover { background: #000 !important; }
-  .graffiti-item:nth-child(2) h4 { color: #fff; }
-  .graffiti-item:nth-child(2) p { color: #ccc; }
-
-  .graffiti-item:nth-child(3) {
-    transform: rotate(-1deg);
-    background: rgba(163, 0, 0, 0.9);
-    border-color: #000;
-  }
-  .graffiti-item:nth-child(3):hover { background: #a30000 !important; }
-  .graffiti-item:nth-child(3) h4 { color: #000; }
-  .graffiti-item:nth-child(3) p { color: #fff; }
-
-  .blood-text {
-    font-family: 'Permanent Marker', cursive;
-    font-size: 1.6rem;
-    margin: 0;
-    color: #a30000;
-  }
-
-  /* Music Taste inside Modal */
-  .taste-modal-content {
-    text-align: center;
-  }
-
-  .spotify-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
-  }
-
-  .brick-card {
-    background: #000;
-    border: 4px solid #000;
-    box-shadow: 6px 6px 0px #000;
-    padding: 0;
-    transition: transform 0.2s, box-shadow 0.2s;
-  }
-
-  .brick-card:hover {
-    transform: scale(1.02) rotate(-0.5deg);
-    box-shadow: 10px 10px 0px #cc0000;
-  }
-
-  .brick-card-1 { transform: rotate(-1.5deg); }
-  .brick-card-2 { transform: rotate(1deg); }
-  .brick-card-3 { transform: rotate(-0.5deg); }
-
   /* Credit HUD Footer */
   .site-credit {
     position: absolute;
@@ -803,17 +663,6 @@
       left: 25px;
       width: calc(100% - 50px);
       max-width: none;
-    }
-    .welcome-modal-content {
-      flex-direction: column;
-      text-align: center;
-    }
-    .welcome-textual {
-      text-align: center;
-    }
-    .graffiti-grid, .spotify-grid {
-      grid-template-columns: 1fr;
-      gap: 20px;
     }
   }
 </style>
