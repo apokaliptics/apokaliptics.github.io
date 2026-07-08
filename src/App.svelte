@@ -362,19 +362,36 @@
               <h2 class="poem-modal-title">welcome to my wall</h2>
               <div class="poem-scrollable-content">
                 <div class="poem-stanza">
-                  <p>I've got a little black book with my poems in,</p>
-                  <p>Got a bag with a toothbrush and a comb in,</p>
-                  <p>When I'm a good dog they sometimes throw me the bone in.</p>
+                  <p>I've got a little black book with my poems in</p>
+                  <p>Got a bag with a toothbrush and a comb in</p>
+                  <p>When I'm a good dog</p>
+                  <p>They sometimes throw me the bone in</p>
                 </div>
                 <div class="poem-stanza">
-                  <p>I've got elastic bands keeping my shoes on,</p>
-                  <p>Got those swollen-hand blues,</p>
-                  <p>Got thirteen channels of shit on the T.V. to choose from.</p>
+                  <p>I got elastic bands keepin' my shoes on</p>
+                  <p>Got those swollen hand blues</p>
+                  <p>I got thirteen channels of shit on the TV to choose from</p>
                 </div>
                 <div class="poem-stanza">
-                  <p>I've got a second-hand piano to play,</p>
-                  <p>And a telephone next to the couch,</p>
-                  <p>But nobody's home when I call...</p>
+                  <p>I've got electric light</p>
+                  <p>And I've got second sight</p>
+                  <p>I got amazing powers of observation</p>
+                  <p>And that is how I know, when I try to get through</p>
+                  <p>On the telephone to you, there'll be nobody home</p>
+                </div>
+                <div class="poem-stanza">
+                  <p>I've got the obligatory Hendrix perm and the inevitable pinhole burns</p>
+                  <p>Now all down the front of my favorite satin shirt</p>
+                  <p>I've got nicotine stains on my fingers, I've got a silver spoon on a chain</p>
+                  <p>Got a grand piano to prop up my mortal remains</p>
+                </div>
+                <div class="poem-stanza">
+                  <p>I've got wild staring eyes</p>
+                  <p>And I've got a strong urge to fly, but I got nowhere to fly to</p>
+                  <p>Ooh, babe when I pick up the phone there is still nobody home</p>
+                </div>
+                <div class="poem-stanza">
+                  <p>I've got a pair of Gohills boots and I got fading roots</p>
                 </div>
                 <div class="poem-signature">- Pink Floyd (Nobody Home, 1979)</div>
               </div>

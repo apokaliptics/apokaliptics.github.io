@@ -90,18 +90,78 @@
     }
   });
 
-  // Rapid screen glow flicker for noise channels, stable glow for images
-  useTask(() => {
+  // Smoke particle system state
+  interface SmokeParticle {
+    x: number;
+    y: number;
+    z: number;
+    scale: number;
+    opacity: number;
+    age: number;
+  }
+
+  let smokeParticles = $state<SmokeParticle[]>(
+    Array.from({ length: 12 }, (_, i) => ({
+      x: 0.025,
+      y: 0.030,
+      z: 0.019,
+      scale: 0.005,
+      opacity: 0,
+      age: i * (2.0 / 12),
+    }))
+  );
+
+  const tipLocalPos = { x: 0.025, y: 0.030, z: 0.019 };
+
+  // Rapid screen glow flicker for noise channels, stable glow for images, and update smoke particles
+  useTask((delta) => {
+    // TV glow
     if (!tvPower) {
       tvScreenLightIntensity = 0;
-      return;
-    }
-    const isStatic = [3, 7, 12].includes(tvChannel);
-    if (isStatic) {
-      tvScreenLightIntensity = 0.35 + Math.random() * 0.55;
     } else {
-      tvScreenLightIntensity = 0.75;
+      const isStatic = [3, 7, 12].includes(tvChannel);
+      tvScreenLightIntensity = isStatic ? (0.35 + Math.random() * 0.55) : 0.75;
     }
+
+    // Smoke particles update
+    const dt = delta || 0.016;
+    const duration = 2.0; // 2 seconds particle lifetime
+
+    for (let i = 0; i < smokeParticles.length; i++) {
+      const p = smokeParticles[i];
+      p.age += dt;
+
+      if (p.age >= duration) {
+        p.age = 0;
+        p.x = tipLocalPos.x;
+        p.y = tipLocalPos.y;
+        p.z = tipLocalPos.z;
+        p.scale = 0.003;
+        p.opacity = 0.35 + Math.random() * 0.2;
+      } else {
+        const t = p.age / duration; // normalized life 0 to 1
+        
+        // Rise up
+        p.y = tipLocalPos.y + t * 0.45;
+        
+        // Wavy drift using sine/cosine based on time and index
+        const driftSpeed = 3.5;
+        p.x = tipLocalPos.x + Math.sin(t * driftSpeed + i * 1.5) * 0.05;
+        p.z = tipLocalPos.z + Math.cos(t * driftSpeed + i * 2.0) * 0.05;
+        
+        // Grow
+        p.scale = 0.003 + t * 0.06;
+        
+        // Fade in / out
+        if (t < 0.25) {
+          p.opacity = (t / 0.25) * 0.55;
+        } else {
+          p.opacity = 0.55 * (1 - (t - 0.25) / 0.75);
+        }
+      }
+    }
+    // Trigger Svelte reactivity
+    smokeParticles = [...smokeParticles];
   });
 </script>
 
@@ -197,6 +257,66 @@
   color={0xffa726}
   castShadow
 />
+
+<!-- Ashtray and Smoking Cigarette on Side Table -->
+<T.Group position={[-1.42, 0.39, 1.70]}>
+  <!-- Ashtray Glass Base -->
+  <T.Mesh position={[0, 0.004, 0]} castShadow receiveShadow>
+    <T.CylinderGeometry args={[0.055, 0.05, 0.008, 16]} />
+    <T.MeshStandardMaterial color={0x2d5a27} roughness={0.15} metalness={0.1} transparent opacity={0.6} />
+  </T.Mesh>
+  
+  <!-- Ashtray Glass Rim -->
+  <T.Mesh position={[0, 0.012, 0]} rotation={[Math.PI / 2, 0, 0]} castShadow>
+    <T.TorusGeometry args={[0.046, 0.008, 8, 24]} />
+    <T.MeshStandardMaterial color={0x2d5a27} roughness={0.15} metalness={0.1} transparent opacity={0.6} />
+  </T.Mesh>
+
+  <!-- Cigarette resting on the rim -->
+  <T.Group position={[0.022, 0.012, 0.022]} rotation={[0.25, Math.PI * 0.75, 0]}>
+    <!-- Filter (Brown/Orange) -->
+    <T.Mesh position={[0, -0.012, 0]} castShadow>
+      <T.CylinderGeometry args={[0.003, 0.003, 0.012, 8]} />
+      <T.MeshStandardMaterial color={0xc68e4f} roughness={0.6} />
+    </T.Mesh>
+    
+    <!-- Cigarette Paper (White) -->
+    <T.Mesh position={[0, 0.006, 0]} castShadow>
+      <T.CylinderGeometry args={[0.003, 0.003, 0.024, 8]} />
+      <T.MeshStandardMaterial color={0xeeeeee} roughness={0.5} />
+    </T.Mesh>
+    
+    <!-- Glowing Cherry / Ash Tip -->
+    <T.Mesh position={[0, 0.019, 0]} castShadow>
+      <T.SphereGeometry args={[0.0032, 8, 8]} />
+      <T.MeshStandardMaterial color={0xff3300} emissive={0xff3300} emissiveIntensity={3} roughness={0.2} />
+    </T.Mesh>
+    
+    <!-- Small Point Light for the glowing cherry -->
+    <T.PointLight
+      position={[0, 0.02, 0]}
+      intensity={0.15}
+      distance={0.3}
+      decay={2}
+      color={0xff5500}
+    />
+  </T.Group>
+
+  <!-- Smoke Particles (rising straight up in Ashtray's coordinate space) -->
+  {#each smokeParticles as p, idx (idx)}
+    {#if p.opacity > 0}
+      <T.Mesh position={[p.x, p.y, p.z]}>
+        <T.SphereGeometry args={[p.scale, 8, 8]} />
+        <T.MeshBasicMaterial
+          color={0xdddddd}
+          transparent
+          opacity={p.opacity}
+          depthWrite={false}
+        />
+      </T.Mesh>
+    {/if}
+  {/each}
+</T.Group>
 
 <!-- Premium Wooden TV Table / Credenza -->
 <!-- Legs -->
