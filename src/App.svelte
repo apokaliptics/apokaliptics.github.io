@@ -9,6 +9,7 @@
   import SheetContent from './components/SheetContent.svelte';
 
   const musicUrl = new URL('../03 Nobody Home.mp3', import.meta.url).href;
+  const baseUrl = import.meta.env.BASE_URL;
 
   // Svelte 5 reactive states
   let introCompleted = $state(false);
@@ -210,8 +211,8 @@
 
     <!-- Top Navigation Bar HUD -->
     <nav class="navbar-overlay">
-      <a href="/" class="logo-link" onclick={(e) => { e.preventDefault(); toggleMusic(); }} title="Toggle Background Music">
-        <img src="/brick-logo.png" alt="Brick Logo" class="logo-img" class:pulse={musicPlaying}>
+      <a href={baseUrl} class="logo-link" onclick={(e) => { e.preventDefault(); toggleMusic(); }} title="Toggle Background Music">
+        <img src={`${baseUrl}brick-logo.png`} alt="Brick Logo" class="logo-img" class:pulse={musicPlaying}>
       </a>
 
       <ul class="nav-links">

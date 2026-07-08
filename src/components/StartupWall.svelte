@@ -16,8 +16,9 @@
 	let { onComplete }: Props = $props();
 
 	// Assets via Vite URL imports
-	const brickTexturePng = '/brick-texture.png';
-	const brickLogoPng = '/brick-logo.png';
+	const baseUrl = import.meta.env.BASE_URL;
+	const brickTexturePng = `${baseUrl}brick-texture.png`;
+	const brickLogoPng = `${baseUrl}brick-logo.png`;
 
 	// Animation states
 	let assetsLoaded = $state(false);
