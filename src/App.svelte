@@ -67,16 +67,12 @@
   function handleIntroComplete() {
     introCompleted = true;
     showWallIntro = true;
+  }
 
-    if (introTimer) {
-      clearTimeout(introTimer);
-    }
-
-    introTimer = setTimeout(() => {
-      showWallIntro = false;
-      showApp = true;
-      playMusic();
-    }, 2200);
+  function enterApp() {
+    showWallIntro = false;
+    showApp = true;
+    playMusic();
   }
 
   function playMusic() {
@@ -169,9 +165,12 @@
 {#if !introCompleted}
   <StartupWall onComplete={handleIntroComplete} />
 {:else if showWallIntro}
-  <div class="wall-intro" transition:fade={{ duration: 500 }}>
+  <!-- svelte-ignore a11y_click_events_have_key_events -->
+  <!-- svelte-ignore a11y_no_static_element_interactions -->
+  <div class="wall-intro" transition:fade={{ duration: 500 }} onclick={enterApp} style="cursor: pointer;">
     <div class="wall-intro-card">
       <span>welcome to my wall</span>
+      <div class="enter-subtext">click to enter</div>
     </div>
   </div>
 {:else if showApp}
@@ -325,12 +324,30 @@
 
   .wall-intro-card {
     padding: 22px 34px;
-    border: 1px solid rgba(255, 255, 255, 0.14);
     background: rgba(0, 0, 0, 0.36);
     box-shadow: 0 0 60px rgba(0, 0, 0, 0.45);
     backdrop-filter: blur(2px);
     font-size: clamp(1.8rem, 3vw, 3.1rem);
     text-shadow: 0 2px 12px rgba(0, 0, 0, 0.6);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .enter-subtext {
+    font-size: 1rem;
+    color: #888;
+    margin-top: 15px;
+    text-align: center;
+    letter-spacing: 0.1em;
+    font-family: 'Cutive Mono', monospace;
+    text-transform: uppercase;
+    animation: pulse-slow 2s infinite;
+  }
+
+  @keyframes pulse-slow {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 1; }
   }
 
   /* Navbar overlay styling */
