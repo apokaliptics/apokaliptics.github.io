@@ -10,6 +10,7 @@
     canvasElement: HTMLCanvasElement | null;
     textureUpdateTrigger: number;
     cameraMode: 'free' | 'poem' | 'piano' | 'telephone' | 'tv';
+    resetTrigger?: number;
     bookCanvasElement: HTMLCanvasElement | null;
     sheetCanvasElement: HTMLCanvasElement | null;
     bookTextureTrigger: number;
@@ -25,6 +26,7 @@
     canvasElement, 
     textureUpdateTrigger, 
     cameraMode,
+    resetTrigger = 0,
     bookCanvasElement,
     sheetCanvasElement,
     bookTextureTrigger,
@@ -51,8 +53,8 @@
       cameraTarget = [-3.16, 0.92, -2.46];
     } else if (cameraMode === 'telephone') {
       // Inside the booth — eye height near the door side, looking at the phone shelf
-      cameraPosition = [-2.5, 1.62, 2.38];
-      cameraTarget = [-2.68, 0.9, 2.55];
+      cameraPosition = [-2.65, 1.62, 2.74];
+      cameraTarget = [-2.66, 0.9, 2.49];
     } else if (cameraMode === 'tv') {
       cameraPosition = [0.0, 0.95, 1.55];
       cameraTarget = [0.0, 0.95, -1.39];
@@ -128,6 +130,7 @@
         {cameraPosition}
         {cameraTarget}
         {cameraMode}
+        {resetTrigger}
       />
     {/if}
   </Canvas>

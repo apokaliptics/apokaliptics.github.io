@@ -112,26 +112,32 @@
 </T.Mesh>
 
 <!-- Retro Velvet Couch (Armchair size) -->
-<!-- Seat Base -->
-<T.Mesh position={[0, 0.15, 1.8]} castShadow receiveShadow>
-  <T.BoxGeometry args={[1.5, 0.25, 0.8]} />
-  <T.MeshStandardMaterial color={0x721c24} roughness={0.85} />
-</T.Mesh>
-<!-- Backrest -->
-<T.Mesh position={[0, 0.55, 2.15]} castShadow receiveShadow>
-  <T.BoxGeometry args={[1.9, 0.6, 0.2]} />
-  <T.MeshStandardMaterial color={0x721c24} roughness={0.85} />
-</T.Mesh>
-<!-- Left Armrest -->
-<T.Mesh position={[-0.85, 0.3, 1.8]} castShadow receiveShadow>
-  <T.BoxGeometry args={[0.2, 0.5, 0.8]} />
-  <T.MeshStandardMaterial color={0x721c24} roughness={0.85} />
-</T.Mesh>
-<!-- Right Armrest -->
-<T.Mesh position={[0.85, 0.3, 1.8]} castShadow receiveShadow>
-  <T.BoxGeometry args={[0.2, 0.5, 0.8]} />
-  <T.MeshStandardMaterial color={0x721c24} roughness={0.85} />
-</T.Mesh>
+<T.Group
+  onclick={(e: any) => { e.stopPropagation(); onBookClick?.(); }}
+  onpointerenter={() => { document.body.style.cursor = 'pointer'; }}
+  onpointerleave={() => { document.body.style.cursor = 'auto'; }}
+>
+  <!-- Seat Base -->
+  <T.Mesh position={[0, 0.15, 1.8]} castShadow receiveShadow>
+    <T.BoxGeometry args={[1.5, 0.25, 0.8]} />
+    <T.MeshStandardMaterial color={0x721c24} roughness={0.85} />
+  </T.Mesh>
+  <!-- Backrest -->
+  <T.Mesh position={[0, 0.55, 2.15]} castShadow receiveShadow>
+    <T.BoxGeometry args={[1.9, 0.6, 0.2]} />
+    <T.MeshStandardMaterial color={0x721c24} roughness={0.85} />
+  </T.Mesh>
+  <!-- Left Armrest -->
+  <T.Mesh position={[-0.85, 0.3, 1.8]} castShadow receiveShadow>
+    <T.BoxGeometry args={[0.2, 0.5, 0.8]} />
+    <T.MeshStandardMaterial color={0x721c24} roughness={0.85} />
+  </T.Mesh>
+  <!-- Right Armrest -->
+  <T.Mesh position={[0.85, 0.3, 1.8]} castShadow receiveShadow>
+    <T.BoxGeometry args={[0.2, 0.5, 0.8]} />
+    <T.MeshStandardMaterial color={0x721c24} roughness={0.85} />
+  </T.Mesh>
+</T.Group>
 
 <!-- Retro Side Table -->
 <!-- Table Leg -->
@@ -293,7 +299,13 @@
 {/if}
 
 <!-- Grand Piano in the Outfar -->
-<T.Group position={[-3.2, 0, -2.5]} rotation={[0, Math.PI / 4, 0]}>
+<T.Group
+  position={[-3.2, 0, -2.5]}
+  rotation={[0, Math.PI / 4, 0]}
+  onclick={(e: any) => { e.stopPropagation(); onSheetClick?.(); }}
+  onpointerenter={() => { document.body.style.cursor = 'pointer'; }}
+  onpointerleave={() => { document.body.style.cursor = 'auto'; }}
+>
   <!-- Spotlight from above -->
   <T.SpotLight
     position={[0, 4.5, 0]}
@@ -633,17 +645,10 @@
 
   <!-- ─── Helper macro: window face = outer surround + real glass + glazing bars ─── -->
 
-  <!-- === BACK FACE (-Z): Full window === -->
-  <!-- Glass pane — transparent reflective -->
-  <T.Mesh position={[0, 1.37, -0.402]}>
+  <!-- === BACK FACE (-Z): Solid Panel === -->
+  <T.Mesh position={[0, 1.37, -0.402]} castShadow receiveShadow>
     <T.BoxGeometry args={[0.7, 2.28, 0.015]} />
-    <T.MeshStandardMaterial
-      color={0xc8e8f0}
-      transparent
-      opacity={0.18}
-      roughness={0.05}
-      metalness={0.35}
-    />
+    <T.MeshStandardMaterial color={0xcc0000} roughness={0.5} />
   </T.Mesh>
   <!-- Horizontal glazing bars (back) — 5 rows -->
   {#each [0.28, 0.61, 0.94, 1.27, 1.65, 2.01] as barY (barY)}
@@ -758,7 +763,7 @@
   <!-- INTERIOR — BACK WALL (behind phone, facing door)            -->
   <!--   Solid red panel on the +Z interior wall                   -->
   <!-- ══════════════════════════════════════════════════════════ -->
-  <T.Mesh position={[0, 1.37, 0.37]} receiveShadow>
+  <T.Mesh position={[0, 1.37, -0.37]} receiveShadow>
     <T.BoxGeometry args={[0.74, 2.42, 0.01]} />
     <T.MeshStandardMaterial color={0x9a0000} roughness={0.75} />
   </T.Mesh>
@@ -808,7 +813,6 @@
     distance={3.2}
     decay={1.6}
     color={0xffd060}
-    castShadow
   />
   <!-- Subtle secondary fill from below (bounce) -->
   <T.PointLight
@@ -829,54 +833,54 @@
   <!-- ══════════════════════════════════════════════════════════════ -->
 
   <!-- Wall-mount shelf bracket -->
-  <T.Mesh position={[0, 0.86, 0.25]} castShadow receiveShadow>
+  <T.Mesh position={[0, 0.86, -0.25]} castShadow receiveShadow>
     <T.BoxGeometry args={[0.32, 0.02, 0.18]} />
     <T.MeshStandardMaterial color={0x111111} roughness={0.72} metalness={0.2} />
   </T.Mesh>
   <!-- Bracket support triangle (visual only) -->
-  <T.Mesh position={[0, 0.79, 0.32]} rotation={[-Math.PI / 4, 0, 0]} castShadow>
+  <T.Mesh position={[0, 0.79, -0.32]} rotation={[Math.PI / 4, 0, 0]} castShadow>
     <T.BoxGeometry args={[0.04, 0.02, 0.1]} />
     <T.MeshStandardMaterial color={0x111111} roughness={0.7} />
   </T.Mesh>
-
+ 
   <!-- Coin / payment box (top unit, GPO-style red) -->
-  <T.Mesh position={[0, 1.22, 0.26]} castShadow>
+  <T.Mesh position={[0, 1.22, -0.26]} castShadow>
     <T.BoxGeometry args={[0.19, 0.22, 0.11]} />
     <T.MeshStandardMaterial color={0x880000} roughness={0.55} metalness={0.1} />
   </T.Mesh>
   <!-- Coin slot recess -->
-  <T.Mesh position={[0, 1.3, 0.318]}>
+  <T.Mesh position={[0, 1.3, -0.202]}>
     <T.BoxGeometry args={[0.06, 0.012, 0.006]} />
     <T.MeshStandardMaterial color={0x222222} roughness={0.8} />
   </T.Mesh>
   <!-- Coin return button -->
-  <T.Mesh position={[-0.07, 1.18, 0.318]} rotation={[Math.PI / 2, 0, 0]}>
+  <T.Mesh position={[-0.07, 1.18, -0.202]} rotation={[Math.PI / 2, 0, 0]}>
     <T.CylinderGeometry args={[0.012, 0.012, 0.01, 8]} />
     <T.MeshStandardMaterial color={0xc8a000} metalness={0.7} roughness={0.3} />
   </T.Mesh>
-
+ 
   <!-- Phone body (bakelite housing, wall-mounted below coin box) -->
-  <T.Mesh position={[0, 0.95, 0.27]} castShadow>
+  <T.Mesh position={[0, 0.95, -0.27]} castShadow>
     <T.BoxGeometry args={[0.21, 0.16, 0.13]} />
     <T.MeshStandardMaterial color={0x0c0c0c} roughness={0.68} />
   </T.Mesh>
   <!-- Dial recess face plate (angled upward) -->
-  <T.Mesh position={[0, 0.98, 0.335]} rotation={[-Math.PI / 10, 0, 0]} castShadow>
+  <T.Mesh position={[0, 0.98, -0.205]} rotation={[-Math.PI / 10, 0, 0]} castShadow>
     <T.BoxGeometry args={[0.18, 0.13, 0.018]} />
     <T.MeshStandardMaterial color={0x181818} roughness={0.6} />
   </T.Mesh>
   <!-- Rotary dial disc (cream/ivory) -->
-  <T.Mesh position={[0, 1.005, 0.345]} rotation={[-Math.PI / 10, 0, 0]} castShadow>
+  <T.Mesh position={[0, 1.005, -0.195]} rotation={[-Math.PI / 10, 0, 0]} castShadow>
     <T.CylinderGeometry args={[0.052, 0.052, 0.01, 16]} />
     <T.MeshStandardMaterial color={0xe8e4c2} roughness={0.38} />
   </T.Mesh>
   <!-- Dial finger guard (chrome ring) -->
-  <T.Mesh position={[0, 1.005, 0.346]} rotation={[-Math.PI / 10, 0, 0]}>
+  <T.Mesh position={[0, 1.005, -0.194]} rotation={[-Math.PI / 10, 0, 0]}>
     <T.CylinderGeometry args={[0.052, 0.052, 0.008, 16, 1, true]} />
     <T.MeshStandardMaterial color={0xcccccc} metalness={0.75} roughness={0.2} />
   </T.Mesh>
   <!-- Dial centre nub -->
-  <T.Mesh position={[0, 1.005, 0.348]} rotation={[-Math.PI / 10, 0, 0]}>
+  <T.Mesh position={[0, 1.005, -0.192]} rotation={[-Math.PI / 10, 0, 0]}>
     <T.CylinderGeometry args={[0.01, 0.01, 0.012, 8]} />
     <T.MeshStandardMaterial color={0x333333} roughness={0.5} />
   </T.Mesh>
@@ -885,24 +889,24 @@
     {@const angle = (-Math.PI / 2) + (hi / 6) * Math.PI}
     {@const hx = Math.cos(angle) * 0.034}
     {@const hy = Math.sin(angle) * 0.034}
-    <T.Mesh position={[hx, 1.005 + hy, 0.348]} rotation={[-Math.PI / 10, 0, 0]}>
+    <T.Mesh position={[hx, 1.005 + hy, -0.192]} rotation={[-Math.PI / 10, 0, 0]}>
       <T.CylinderGeometry args={[0.007, 0.007, 0.013, 6]} />
       <T.MeshStandardMaterial color={0x050505} roughness={0.9} />
     </T.Mesh>
   {/each}
-
+ 
   <!-- Handset cradle prongs (two humps on top of phone) -->
-  <T.Mesh position={[-0.06, 1.05, 0.255]} castShadow>
+  <T.Mesh position={[-0.06, 1.05, -0.255]} castShadow>
     <T.CylinderGeometry args={[0.014, 0.014, 0.022, 8]} />
     <T.MeshStandardMaterial color={0x0a0a0a} roughness={0.65} />
   </T.Mesh>
-  <T.Mesh position={[0.06, 1.05, 0.255]} castShadow>
+  <T.Mesh position={[0.06, 1.05, -0.255]} castShadow>
     <T.CylinderGeometry args={[0.014, 0.014, 0.022, 8]} />
     <T.MeshStandardMaterial color={0x0a0a0a} roughness={0.65} />
   </T.Mesh>
-
+ 
   <!-- Handset resting in cradle (on top of phone, angled) -->
-  <T.Group position={[0, 1.075, 0.255]} rotation={[0, 0.18, 0]}>
+  <T.Group position={[0, 1.075, -0.255]} rotation={[0, 0.18, 0]}>
     <!-- Grip bar -->
     <T.Mesh castShadow>
       <T.BoxGeometry args={[0.155, 0.018, 0.026]} />
@@ -930,49 +934,49 @@
   </T.Group>
 
   <!-- Coiled handset cord — 4 short cylinder segments looping down -->
-  <T.Mesh position={[-0.07, 1.04, 0.27]} rotation={[0.3, 0.1, 0.55]} castShadow>
+  <T.Mesh position={[-0.07, 1.04, -0.27]} rotation={[0.3, 0.1, 0.55]} castShadow>
     <T.CylinderGeometry args={[0.003, 0.003, 0.055, 6]} />
     <T.MeshStandardMaterial color={0x111111} roughness={0.88} />
   </T.Mesh>
-  <T.Mesh position={[-0.1, 0.98, 0.27]} rotation={[0.15, 0, 0.7]} castShadow>
+  <T.Mesh position={[-0.1, 0.98, -0.27]} rotation={[0.15, 0, 0.7]} castShadow>
     <T.CylinderGeometry args={[0.003, 0.003, 0.06, 6]} />
     <T.MeshStandardMaterial color={0x111111} roughness={0.88} />
   </T.Mesh>
-  <T.Mesh position={[-0.12, 0.92, 0.26]} rotation={[-0.1, 0, 0.55]} castShadow>
+  <T.Mesh position={[-0.12, 0.92, -0.26]} rotation={[-0.1, 0, 0.55]} castShadow>
     <T.CylinderGeometry args={[0.003, 0.003, 0.07, 6]} />
     <T.MeshStandardMaterial color={0x111111} roughness={0.88} />
   </T.Mesh>
-  <T.Mesh position={[-0.1, 0.86, 0.265]} rotation={[0, 0, 0.3]} castShadow>
+  <T.Mesh position={[-0.1, 0.86, -0.265]} rotation={[0, 0, 0.3]} castShadow>
     <T.CylinderGeometry args={[0.003, 0.003, 0.065, 6]} />
     <T.MeshStandardMaterial color={0x111111} roughness={0.88} />
   </T.Mesh>
-
+ 
   <!-- BT instruction card (cream paper above phone) -->
-  <T.Mesh position={[0, 1.42, 0.32]} rotation={[-Math.PI / 14, 0, 0]} castShadow>
+  <T.Mesh position={[0, 1.42, -0.32]} rotation={[Math.PI / 14, 0, 0]} castShadow>
     <T.BoxGeometry args={[0.16, 0.1, 0.003]} />
     <T.MeshStandardMaterial color={0xf0edd5} roughness={0.8} />
   </T.Mesh>
   <!-- Card text lines (dark narrow strips) -->
   {#each [0.032, 0.012, -0.008, -0.028] as ly (ly)}
-    <T.Mesh position={[0, 1.42 + ly, 0.322]} rotation={[-Math.PI / 14, 0, 0]}>
+    <T.Mesh position={[0, 1.42 + ly, -0.318]} rotation={[Math.PI / 14, 0, 0]}>
       <T.BoxGeometry args={[0.12, 0.005, 0.002]} />
       <T.MeshStandardMaterial color={0x333333} roughness={0.8} />
     </T.Mesh>
   {/each}
-
+ 
   <!-- 999 emergency sticker (bright red small panel) -->
-  <T.Mesh position={[0.07, 1.42, 0.322]} rotation={[-Math.PI / 14, 0, 0]}>
+  <T.Mesh position={[0.07, 1.42, -0.318]} rotation={[Math.PI / 14, 0, 0]}>
     <T.BoxGeometry args={[0.042, 0.028, 0.002]} />
     <T.MeshStandardMaterial color={0xff0000} roughness={0.55} emissive={0xaa0000} emissiveIntensity={0.3} />
   </T.Mesh>
-
+ 
   <!-- Phone directory shelf (lower shelf under phone) -->
-  <T.Mesh position={[0, 0.72, 0.26]} castShadow>
+  <T.Mesh position={[0, 0.72, -0.26]} castShadow>
     <T.BoxGeometry args={[0.24, 0.015, 0.15]} />
     <T.MeshStandardMaterial color={0x0f0f0f} roughness={0.72} />
   </T.Mesh>
   <!-- Phone directory (yellow pages style) -->
-  <T.Mesh position={[0.02, 0.74, 0.27]} rotation={[0, 0.05, 0.02]} castShadow>
+  <T.Mesh position={[0.02, 0.74, -0.27]} rotation={[0, 0.05, 0.02]} castShadow>
     <T.BoxGeometry args={[0.14, 0.025, 0.1]} />
     <T.MeshStandardMaterial color={0xe8d840} roughness={0.85} />
   </T.Mesh>

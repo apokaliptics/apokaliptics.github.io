@@ -15,7 +15,16 @@
   let introCompleted = $state(false);
   let showWallIntro = $state(false);
   let showApp = $state(false);
-  let cameraMode = $state<'free' | 'poem' | 'piano' | 'telephone' | 'tv'>('poem');
+  let cameraMode = $state<'free' | 'poem' | 'piano' | 'telephone' | 'tv'>('free');
+  let resetTrigger = $state(0);
+  let activeModal = $state<'none' | 'telephone' | 'poem' | 'piano'>('none');
+
+  $effect(() => {
+    // Whenever cameraMode changes, close any active modal
+    if (cameraMode) {
+      activeModal = 'none';
+    }
+  });
   
   let tvPower = $state(false);
   let tvChannel = $state(1);
@@ -134,7 +143,14 @@
   }
 
   function selectCamera(mode: 'free' | 'poem' | 'piano' | 'telephone' | 'tv') {
-    cameraMode = mode;
+    if (cameraMode === mode) {
+      cameraMode = 'free';
+      if (mode === 'free') {
+        resetTrigger += 1;
+      }
+    } else {
+      cameraMode = mode;
+    }
   }
 
   function triggerBookUpdate() {
@@ -182,6 +198,7 @@
       {canvasElement}
       {textureUpdateTrigger}
       {cameraMode}
+      {resetTrigger}
       {bookCanvasElement}
       {sheetCanvasElement}
       {bookTextureTrigger}
@@ -285,7 +302,109 @@
       </div>
     </div>
 
+    <!-- Action buttons inside camera modes -->
+    {#if cameraMode === 'telephone' && activeModal === 'none'}
+      <div class="action-overlay-container" transition:fade={{ duration: 250 }}>
+        <button class="action-overlay-btn call-btn" onclick={() => activeModal = 'telephone'}>
+          CALL
+        </button>
+      </div>
+    {:else if cameraMode === 'poem' && activeModal === 'none'}
+      <div class="action-overlay-container" transition:fade={{ duration: 250 }}>
+        <button class="action-overlay-btn view-poems-btn" onclick={() => activeModal = 'poem'}>
+          VIEW POEMS
+        </button>
+      </div>
+    {:else if cameraMode === 'piano' && activeModal === 'none'}
+      <div class="action-overlay-container" transition:fade={{ duration: 250 }}>
+        <button class="action-overlay-btn see-sheet-btn" onclick={() => activeModal = 'piano'}>
+          SEE PIANO SHEET
+        </button>
+      </div>
+    {/if}
 
+    <!-- Modal Overlays -->
+    {#if activeModal !== 'none'}
+      <!-- svelte-ignore a11y_click_events_have_key_events -->
+      <!-- svelte-ignore a11y_no_static_element_interactions -->
+      <div class="modal-backdrop" transition:fade={{ duration: 300 }} onclick={() => activeModal = 'none'}>
+        <div class="modal-wrapper" onclick={(e) => e.stopPropagation()}>
+          
+          {#if activeModal === 'telephone'}
+            <!-- Telephone "Tear Down The Wall" Modal -->
+            <div class="modal-card phone-modal" transition:fade={{ duration: 250 }}>
+              <div class="polaroid-frame">
+                <img src={`${baseUrl}the_wall_characters.jpg`} alt="Tear Down The Wall" class="polaroid-img">
+                <div class="polaroid-caption">TEAR DOWN THE WALL</div>
+              </div>
+              <div class="phone-call-info">
+                <div class="profile-header">APOKALIPTICS</div>
+                <div class="profile-subtitle">OLD PROFILE CONNECTION</div>
+                
+                <div class="phone-projects-section">
+                  <h4 class="phone-projects-title">PROJECTS:</h4>
+                  <ul class="phone-projects-list">
+                    <li>Brick</li>
+                    <li>Frameprint</li>
+                    <li><a href="https://community.obsidian.md/plugins/concrete" target="_blank" rel="noopener noreferrer" class="project-link-telephone">Concrete</a></li>
+                  </ul>
+                </div>
+
+                <div class="call-status pulse-slow">CALLING...</div>
+                <button class="hangup-btn" onclick={() => activeModal = 'none'}>HANG UP</button>
+              </div>
+            </div>
+            
+          {:else if activeModal === 'poem'}
+            <!-- Poem Brick Wall Modal -->
+            <div class="modal-card poem-modal" style="background-image: linear-gradient(rgba(0,0,0,0.65), rgba(0,0,0,0.65)), url('{baseUrl}My%20Wall%20(red).png')" transition:fade={{ duration: 250 }}>
+              <button class="close-modal-btn" onclick={() => activeModal = 'none'}>&times;</button>
+              <h2 class="poem-modal-title">welcome to my wall</h2>
+              <div class="poem-scrollable-content">
+                <div class="poem-stanza">
+                  <p>I've got a little black book with my poems in,</p>
+                  <p>Got a bag with a toothbrush and a comb in,</p>
+                  <p>When I'm a good dog they sometimes throw me the bone in.</p>
+                </div>
+                <div class="poem-stanza">
+                  <p>I've got elastic bands keeping my shoes on,</p>
+                  <p>Got those swollen-hand blues,</p>
+                  <p>Got thirteen channels of shit on the T.V. to choose from.</p>
+                </div>
+                <div class="poem-stanza">
+                  <p>I've got a second-hand piano to play,</p>
+                  <p>And a telephone next to the couch,</p>
+                  <p>But nobody's home when I call...</p>
+                </div>
+                <div class="poem-signature">- Pink Floyd (Nobody Home, 1979)</div>
+              </div>
+            </div>
+            
+          {:else if activeModal === 'piano'}
+            <!-- Piano Sheet Modal -->
+            <div class="modal-card sheet-modal" transition:fade={{ duration: 250 }}>
+              <button class="close-modal-btn dark" onclick={() => activeModal = 'none'}>&times;</button>
+              <div class="sheet-paper">
+                <div class="sheet-page left-page">
+                  <h3 class="sheet-title">if i commit suicide</h3>
+                  <div class="embed-container">
+                    <iframe allow="autoplay *; encrypted-media *; fullscreen *; clipboard-write" frameborder="0" height="450" style="width:100%;max-width:660px;overflow:hidden;border-radius:10px;" sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-top-navigation-by-user-activation" src="https://embed.music.apple.com/vn/playlist/if-i-commit-suicide/pl.u-d2b08rWsMkEPVZX" title="if i commit suicide playlist"></iframe>
+                  </div>
+                </div>
+                
+                <div class="sheet-page right-page">
+                  <h3 class="sheet-title">one at a time</h3>
+                  <div class="embed-container">
+                    <iframe allow="autoplay *; encrypted-media *; fullscreen *; clipboard-write" frameborder="0" height="450" style="width:100%;max-width:660px;overflow:hidden;border-radius:10px;" sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-top-navigation-by-user-activation" src="https://embed.music.apple.com/vn/playlist/one-at-a-time/pl.u-DdAN2Bdsa65DvWX" title="one at a time playlist"></iframe>
+                  </div>
+                </div>
+              </div>
+            </div>
+          {/if}
+          
+        </div>
+      </div>
+    {/if}
 
     <footer class="site-credit">
       MAKE BY KIET MINH - TARGET APOKALIPTICS
@@ -664,6 +783,357 @@
     text-shadow: 1px 1px 0px #000;
     pointer-events: none;
     z-index: 5;
+  }
+
+  /* Float action buttons in camera modes */
+  .action-overlay-container {
+    position: absolute;
+    bottom: 90px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+    pointer-events: auto;
+  }
+
+  .action-overlay-btn {
+    font-family: 'Special Elite', monospace;
+    font-size: 1.1rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #fff;
+    background: rgba(18, 18, 18, 0.72);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    padding: 12px 28px;
+    border-radius: 30px;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(8px);
+    transition: all 0.3s cubic-bezier(0.19, 1, 0.22, 1);
+  }
+
+  .action-overlay-btn:hover {
+    background: #fff;
+    color: #000;
+    border-color: #fff;
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.6);
+    transform: scale(1.05);
+  }
+
+  .call-btn {
+    border-color: rgba(255, 51, 51, 0.4);
+    box-shadow: 0 4px 20px rgba(255, 0, 0, 0.15);
+  }
+  .call-btn:hover {
+    background: #ff3333;
+    color: #fff;
+    border-color: #ff3333;
+    box-shadow: 0 0 18px rgba(255, 51, 51, 0.6);
+  }
+
+  /* Modal Backdrop */
+  .modal-backdrop {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.78);
+    backdrop-filter: blur(10px);
+    z-index: 100;
+    display: grid;
+    place-items: center;
+  }
+
+  .modal-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    pointer-events: auto;
+  }
+
+  /* Modal Cards Base */
+  .modal-card {
+    border-radius: 8px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+    display: flex;
+    overflow: hidden;
+    position: relative;
+    max-width: 90%;
+    max-height: 90vh;
+  }
+
+  /* Close Button inside modals */
+  .close-modal-btn {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    font-size: 2.2rem;
+    color: rgba(255, 255, 255, 0.6);
+    background: none;
+    border: none;
+    cursor: pointer;
+    z-index: 10;
+    transition: color 0.2s;
+  }
+  .close-modal-btn:hover {
+    color: #fff;
+  }
+  .close-modal-btn.dark {
+    color: rgba(0, 0, 0, 0.4);
+  }
+  .close-modal-btn.dark:hover {
+    color: #000;
+  }
+
+  /* 1. Phone Modal ("Tear Down The Wall") */
+  .phone-modal {
+    width: 680px;
+    background: #111;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    flex-direction: row;
+    align-items: stretch;
+  }
+  .polaroid-frame {
+    background: #faf7f2;
+    padding: 20px 20px 35px 20px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    transform: rotate(-1.5deg);
+    margin: 25px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border-radius: 2px;
+    width: 250px;
+  }
+  .polaroid-img {
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    filter: sepia(0.2) contrast(1.1);
+    border: 1px solid rgba(0, 0, 0, 0.15);
+  }
+  .polaroid-caption {
+    font-family: 'Permanent Marker', cursive;
+    font-size: 1.1rem;
+    color: #2b2b2b;
+    margin-top: 18px;
+    letter-spacing: 1px;
+    text-align: center;
+  }
+  .phone-call-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 40px;
+    color: #fff;
+  }
+  .profile-header {
+    font-family: 'Special Elite', monospace;
+    font-size: 1.6rem;
+    letter-spacing: 2px;
+    color: #ff3333;
+    margin-bottom: 5px;
+  }
+  .profile-subtitle {
+    font-family: 'Cutive Mono', monospace;
+    font-size: 0.8rem;
+    color: #777;
+    margin-bottom: 25px;
+    letter-spacing: 1px;
+  }
+  .phone-projects-section {
+    margin-bottom: 30px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 15px 0;
+  }
+  .phone-projects-title {
+    font-family: 'Special Elite', monospace;
+    font-size: 0.9rem;
+    color: #888;
+    margin: 0 0 10px 0;
+    letter-spacing: 1px;
+  }
+  .phone-projects-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-family: 'Cutive Mono', monospace;
+    font-size: 0.95rem;
+    text-align: left;
+  }
+  .phone-projects-list li {
+    color: #eee;
+    padding-left: 18px;
+    position: relative;
+  }
+  .phone-projects-list li::before {
+    content: '■';
+    color: #ff3333;
+    font-size: 0.65rem;
+    position: absolute;
+    left: 0;
+    top: 0px;
+  }
+  .project-link-telephone {
+    color: #ff3333;
+    text-decoration: none;
+    border-bottom: 1px dashed rgba(255, 51, 51, 0.5);
+    transition: all 0.2s;
+  }
+  .project-link-telephone:hover {
+    color: #ff6666;
+    border-bottom-style: solid;
+    text-shadow: 0 0 5px rgba(255, 51, 51, 0.3);
+  }
+  .call-status {
+    font-family: 'Special Elite', monospace;
+    font-size: 1.1rem;
+    color: #fff;
+    margin-bottom: 35px;
+    letter-spacing: 2px;
+  }
+  .hangup-btn {
+    font-family: 'Special Elite', monospace;
+    background: #ff3333;
+    color: #fff;
+    border: none;
+    padding: 12px 0;
+    border-radius: 25px;
+    font-size: 1rem;
+    cursor: pointer;
+    box-shadow: 0 0 15px rgba(255, 51, 51, 0.3);
+    transition: all 0.2s;
+  }
+  .hangup-btn:hover {
+    background: #ff1111;
+    box-shadow: 0 0 20px rgba(255, 51, 51, 0.6);
+  }
+
+  /* 2. Poem Modal (Brick background) */
+  .poem-modal {
+    width: 580px;
+    padding: 45px 35px;
+    background-size: cover;
+    background-position: center;
+    flex-direction: column;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    text-align: center;
+    color: #fff;
+  }
+  .poem-modal-title {
+    font-family: 'Permanent Marker', cursive;
+    font-size: 2.2rem;
+    letter-spacing: 2px;
+    margin-bottom: 25px;
+    text-shadow: 0 3px 8px rgba(0, 0, 0, 0.8);
+  }
+  .poem-scrollable-content {
+    max-height: 55vh;
+    overflow-y: auto;
+    padding-right: 10px;
+  }
+  .poem-scrollable-content::-webkit-scrollbar {
+    width: 6px;
+  }
+  .poem-scrollable-content::-webkit-scrollbar-track {
+    background: rgba(0,0,0,0.2);
+  }
+  .poem-scrollable-content::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.2);
+    border-radius: 3px;
+  }
+  .poem-stanza {
+    font-family: 'Special Elite', monospace;
+    font-size: 1rem;
+    line-height: 1.6;
+    margin-bottom: 30px;
+    color: #eee;
+    text-shadow: 0 2px 5px rgba(0, 0, 0, 0.8);
+  }
+  .poem-stanza p {
+    margin: 5px 0;
+  }
+  .poem-signature {
+    font-family: 'Cutive Mono', monospace;
+    font-size: 0.8rem;
+    color: #aaa;
+    margin-top: 15px;
+    font-style: italic;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+  }
+
+  /* 3. Piano Sheet Modal */
+  .sheet-modal {
+    width: 960px;
+    background: #fdfaf0;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.6);
+  }
+  .sheet-paper {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    padding: 40px 30px;
+  }
+  .sheet-page {
+    flex: 1;
+    padding: 0 25px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .sheet-page.left-page {
+    border-right: 1px dashed rgba(0, 0, 0, 0.12);
+  }
+  .sheet-title {
+    font-family: 'Special Elite', monospace;
+    font-size: 1.3rem;
+    color: #111;
+    margin-bottom: 20px;
+    text-align: center;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .embed-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+
+  /* Responsive sheets */
+  @media (max-width: 768px) {
+    .phone-modal {
+      flex-direction: column;
+      width: 90%;
+    }
+    .polaroid-frame {
+      align-self: center;
+      margin: 20px 0 10px 0;
+    }
+    .phone-call-info {
+      padding: 20px;
+      text-align: center;
+    }
+    .sheet-paper {
+      flex-direction: column;
+      gap: 30px;
+      padding: 30px 15px;
+    }
+    .sheet-page.left-page {
+      border-right: none;
+      border-bottom: 1px dashed rgba(0,0,0,0.12);
+      padding-bottom: 30px;
+    }
+    .poem-modal {
+      width: 95%;
+      padding: 25px 15px;
+    }
   }
 
   /* Responsive styles overlay */
