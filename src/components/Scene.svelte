@@ -19,6 +19,10 @@
     onSheetClick?: () => void;
     onTelephoneClick?: () => void;
     onTVClick?: () => void;
+    pianoLight: boolean;
+    telephoneLight: boolean;
+    tableLamp: boolean;
+    couchSpotlight: boolean;
   }
   let { 
     tvPower, 
@@ -34,7 +38,11 @@
     onBookClick,
     onSheetClick,
     onTelephoneClick,
-    onTVClick
+    onTVClick,
+    pianoLight,
+    telephoneLight,
+    tableLamp,
+    couchSpotlight
   }: Props = $props();
 
   let cameraPosition = $state<[number, number, number]>([0.3, 0.85, 1.3]);
@@ -121,6 +129,10 @@
       {onSheetClick}
       {onTelephoneClick}
       {onTVClick}
+      {pianoLight}
+      {telephoneLight}
+      {tableLamp}
+      {couchSpotlight}
     />
 
     {#if camera && controls}

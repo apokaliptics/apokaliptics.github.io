@@ -28,6 +28,10 @@
   
   let tvPower = $state(false);
   let tvChannel = $state(1);
+  let pianoLight = $state(true);
+  let telephoneLight = $state(true);
+  let tableLamp = $state(true);
+  let couchSpotlight = $state(true);
   let canvasElement = $state<HTMLCanvasElement | null>(null);
   let textureUpdateTrigger = $state(0);
 
@@ -45,6 +49,19 @@
   // TV Controls dial state
   let knobRotation = $state(0);
   let introTimer: ReturnType<typeof setTimeout> | null = null;
+
+  // Automatically pause the "Nobody Home" background music when a YouTube video is playing, and resume it when TV is off or tuned away.
+  $effect(() => {
+    if (!musicAudio) return;
+    const isYouTubeChannel = [7, 9, 12].includes(tvChannel);
+    if (tvPower && isYouTubeChannel) {
+      musicAudio.pause();
+    } else if (musicPlaying) {
+      musicAudio.play().catch(err => {
+        console.warn("Autoplay audio blocked or could not play.", err);
+      });
+    }
+  });
 
   onMount(() => {
     musicAudio = new Audio(musicUrl);
@@ -207,6 +224,10 @@
       onSheetClick={() => selectCamera('piano')}
       onTelephoneClick={() => selectCamera('telephone')}
       onTVClick={() => selectCamera('tv')}
+      {pianoLight}
+      {telephoneLight}
+      {tableLamp}
+      {couchSpotlight}
     />
 
     <!-- Offscreen canvas drawers -->
@@ -299,6 +320,57 @@
             {chanNum}
           </button>
         {/each}
+      </div>
+    </div>
+
+    <!-- Electric Light Control Panel (Interactive HUD) -->
+    <div class="light-hud-controls" class:minimized={cameraMode === 'poem'}>
+      <h3 class="hud-title">ELECTRIC LIGHTS</h3>
+      
+      <div class="light-rows-container">
+        <!-- Piano Spotlight -->
+        <div class="light-row">
+          <span class="light-label">PIANO SPOT</span>
+          <div class="light-control-wrapper">
+            <span class="light-led" class:on={pianoLight}></span>
+            <button class="light-switch" class:on={pianoLight} onclick={() => pianoLight = !pianoLight} aria-label="Toggle Piano Spotlight">
+              <span class="switch-knob"></span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Telephone Light -->
+        <div class="light-row">
+          <span class="light-label">PHONE BOOTH</span>
+          <div class="light-control-wrapper">
+            <span class="light-led" class:on={telephoneLight}></span>
+            <button class="light-switch" class:on={telephoneLight} onclick={() => telephoneLight = !telephoneLight} aria-label="Toggle Telephone Light">
+              <span class="switch-knob"></span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Table Lamp -->
+        <div class="light-row">
+          <span class="light-label">TABLE LAMP</span>
+          <div class="light-control-wrapper">
+            <span class="light-led" class:on={tableLamp}></span>
+            <button class="light-switch" class:on={tableLamp} onclick={() => tableLamp = !tableLamp} aria-label="Toggle Table Lamp">
+              <span class="switch-knob"></span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Couch Spotlight -->
+        <div class="light-row">
+          <span class="light-label">COUCH SPOT</span>
+          <div class="light-control-wrapper">
+            <span class="light-led" class:on={couchSpotlight}></span>
+            <button class="light-switch" class:on={couchSpotlight} onclick={() => couchSpotlight = !couchSpotlight} aria-label="Toggle Couch Spotlight">
+              <span class="switch-knob"></span>
+            </button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -791,15 +863,118 @@
   /* Credit HUD Footer */
   .site-credit {
     position: absolute;
-    bottom: 25px;
+    bottom: 12px;
     left: 25px;
     font-family: 'Cutive Mono', monospace;
-    font-size: 0.75rem;
-    color: #555;
+    font-size: 0.7rem;
+    color: #444;
     letter-spacing: 2px;
     text-shadow: 1px 1px 0px #000;
     pointer-events: none;
     z-index: 5;
+  }
+
+  /* Light HUD dashboard overlay */
+  .light-hud-controls {
+    position: absolute;
+    bottom: 35px;
+    left: 25px;
+    z-index: 10;
+    background: linear-gradient(135deg, #1b1b1b 0%, #0d0d0d 100%);
+    border: 4px solid #000;
+    box-shadow: 8px 8px 0px #000, inset 1px 1px 2px rgba(255,255,255,0.1);
+    padding: 20px;
+    border-radius: 8px;
+    min-width: 260px;
+    box-sizing: border-box;
+    transition: opacity 0.3s, transform 0.3s;
+  }
+
+  .light-hud-controls.minimized {
+    opacity: 0.25;
+  }
+
+  .light-hud-controls.minimized:hover {
+    opacity: 1;
+  }
+
+  .light-rows-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .light-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px dashed #222;
+    padding-bottom: 8px;
+  }
+
+  .light-row:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  .light-label {
+    font-family: 'Special Elite', monospace;
+    font-size: 0.8rem;
+    color: #888;
+    letter-spacing: 0.5px;
+  }
+
+  .light-control-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  /* LED indicator light */
+  .light-led {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #3a0e0e;
+    box-shadow: inset 0 1px 1px rgba(0,0,0,0.5);
+    transition: background-color 0.2s, box-shadow 0.2s;
+  }
+
+  .light-led.on {
+    background: #00ff66;
+    box-shadow: 0 0 8px #00ff66, inset 0 1px 1px rgba(255,255,255,0.5);
+  }
+
+  /* Retro light toggle switch */
+  .light-switch {
+    width: 42px;
+    height: 20px;
+    background: #000;
+    border: 2px solid #333;
+    border-radius: 10px;
+    position: relative;
+    cursor: pointer;
+    padding: 0;
+  }
+
+  .light-switch.on {
+    background: #008800;
+    box-shadow: 0 0 6px rgba(0,255,0,0.3);
+  }
+
+  .light-switch .switch-knob {
+    width: 12px;
+    height: 12px;
+    background: #aaa;
+    border-radius: 50%;
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    transition: left 0.2s;
+  }
+
+  .light-switch.on .switch-knob {
+    left: 24px;
   }
 
   /* Float action buttons in camera modes */

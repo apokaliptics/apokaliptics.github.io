@@ -1,6 +1,6 @@
 <script lang="ts">
   import { T, useTask } from '@threlte/core';
-  import { interactivity } from '@threlte/extras';
+  import { interactivity, HTML } from '@threlte/extras';
   import * as THREE from 'three';
 
   // Enable Raycasting pointer events inside Canvas subtree
@@ -19,6 +19,10 @@
     onSheetClick?: () => void;
     onTelephoneClick?: () => void;
     onTVClick?: () => void;
+    pianoLight: boolean;
+    telephoneLight: boolean;
+    tableLamp: boolean;
+    couchSpotlight: boolean;
   }
   let { 
     tvPower, 
@@ -32,13 +36,24 @@
     onBookClick,
     onSheetClick,
     onTelephoneClick,
-    onTVClick
+    onTVClick,
+    pianoLight,
+    telephoneLight,
+    tableLamp,
+    couchSpotlight
   }: Props = $props();
 
   let canvasTexture = $state<THREE.CanvasTexture | null>(null);
   let bookTexture = $state<THREE.CanvasTexture | null>(null);
   let sheetTexture = $state<THREE.CanvasTexture | null>(null);
   let tvScreenLightIntensity = $state(0);
+
+  const youtubeChannels: Record<number, string> = {
+    7: 'zDDzR2zSgsM',
+    9: 'LSE7qdjy3Q0',
+    12: 'UxgZnVTyWRk'
+  };
+  let youtubeVideoId = $derived(youtubeChannels[tvChannel]);
 
   // Sync canvas texture creation and updates
   $effect(() => {
@@ -199,6 +214,33 @@
   </T.Mesh>
 </T.Group>
 
+<!-- Couch Spotlight from above -->
+{#if couchSpotlight}
+  <T.SpotLight
+    position={[0, 4.5, 1.8]}
+    target.position={[0, 0.15, 1.8]}
+    intensity={3.5}
+    angle={Math.PI / 7}
+    penumbra={0.6}
+    distance={6}
+    decay={1.2}
+    color={0xfffad0}
+    castShadow
+  />
+
+  <!-- Volumetric Spotlight Cone for Couch -->
+  <T.Mesh position={[0, 2.3, 1.8]} rotation={[0, 0, 0]}>
+    <T.CylinderGeometry args={[0.08, 1.2, 4.3, 32, 1, true]} />
+    <T.MeshBasicMaterial
+      color={0xfffad0}
+      transparent
+      opacity={0.08}
+      depthWrite={false}
+      side={THREE.DoubleSide}
+    />
+  </T.Mesh>
+{/if}
+
 <!-- Discarded Satin Shirt with Pinhole Burns (scattered on floor near Couch) -->
 <T.Group position={[-0.8, 0.0, 1.2]}>
   <!-- Shirt Fabric Main (On floor) -->
@@ -298,18 +340,25 @@
 <!-- Lamp Shade -->
 <T.Mesh position={[-1.3, 0.7, 1.8]} castShadow>
   <T.ConeGeometry args={[0.15, 0.18, 12]} />
-  <T.MeshStandardMaterial color={0xfaf0e6} roughness={0.9} />
+  <T.MeshStandardMaterial
+    color={0xfaf0e6}
+    emissive={tableLamp ? 0xffd060 : 0x000000}
+    emissiveIntensity={tableLamp ? 0.5 : 0}
+    roughness={0.9}
+  />
 </T.Mesh>
 
 <!-- Warm lamp light projection -->
-<T.PointLight
-  position={[-1.3, 0.65, 1.8]}
-  intensity={0.65}
-  distance={4}
-  decay={1.5}
-  color={0xffa726}
-  castShadow
-/>
+{#if tableLamp}
+  <T.PointLight
+    position={[-1.3, 0.65, 1.8]}
+    intensity={0.65}
+    distance={4}
+    decay={1.5}
+    color={0xffa726}
+    castShadow
+  />
+{/if}
 
 <!-- Baggy of Weed next to Ashtray -->
 <T.Group position={[-1.28, 0.392, 1.68]} rotation={[0, Math.PI / 6, 0]}>
@@ -386,7 +435,7 @@
 </T.Group>
 
 <!-- Dog Bowl & Bone (on floor near TV Credenza) -->
-<T.Group position={[-0.6, 0.0, -1.3]}>
+<T.Group position={[-0.6, 0.0, -1.3]} scale={1.8}>
   <!-- Dog Bowl Base -->
   <T.Mesh position={[0, 0.004, 0]} castShadow receiveShadow>
     <T.CylinderGeometry args={[0.08, 0.075, 0.008, 16]} />
@@ -490,6 +539,29 @@
   </T.Mesh>
 {/if}
 
+{#if tvPower && youtubeVideoId}
+  <HTML
+    position={[-0.15, 1.0, -1.37]}
+    transform
+    scale={0.001}
+    distanceFactor={400}
+    pointerEvents="none"
+  >
+    <div style="width: 1100px; height: 800px; background: #000; overflow: hidden; pointer-events: none;">
+      <iframe
+        src="https://www.youtube.com/embed/{youtubeVideoId}?autoplay=1&controls=0&rel=0&iv_load_policy=3&modestbranding=1&disablekb=1"
+        title="YouTube Video Player"
+        width="1100"
+        height="800"
+        frameborder="0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        allowfullscreen
+        style="width: 100%; height: 100%; border: none; pointer-events: none;"
+      ></iframe>
+    </div>
+  </HTML>
+{/if}
+
 <!-- Curvature Bezel Gloss Overlay -->
 <T.Mesh position={[-0.15, 1.0, -1.38]}>
   <T.BoxGeometry args={[1.105, 0.805, 0.015]} />
@@ -540,29 +612,31 @@
   onpointerleave={() => { document.body.style.cursor = 'auto'; }}
 >
   <!-- Spotlight from above -->
-  <T.SpotLight
-    position={[0, 4.5, 0]}
-    target.position={[0, 0.5, 0]}
-    intensity={3.5}
-    angle={Math.PI / 7}
-    penumbra={0.6}
-    distance={6}
-    decay={1.2}
-    color={0xfffad0}
-    castShadow
-  />
-
-  <!-- Volumetric Spotlight Cone -->
-  <T.Mesh position={[0, 2.15, 0]} rotation={[0, 0, 0]}>
-    <T.CylinderGeometry args={[0.08, 1.2, 4.3, 32, 1, true]} />
-    <T.MeshBasicMaterial
+  {#if pianoLight}
+    <T.SpotLight
+      position={[0, 4.5, 0]}
+      target.position={[0, 0.5, 0]}
+      intensity={3.5}
+      angle={Math.PI / 7}
+      penumbra={0.6}
+      distance={6}
+      decay={1.2}
       color={0xfffad0}
-      transparent
-      opacity={0.08}
-      depthWrite={false}
-      side={THREE.DoubleSide}
+      castShadow
     />
-  </T.Mesh>
+
+    <!-- Volumetric Spotlight Cone -->
+    <T.Mesh position={[0, 2.15, 0]} rotation={[0, 0, 0]}>
+      <T.CylinderGeometry args={[0.08, 1.2, 4.3, 32, 1, true]} />
+      <T.MeshBasicMaterial
+        color={0xfffad0}
+        transparent
+        opacity={0.08}
+        depthWrite={false}
+        side={THREE.DoubleSide}
+      />
+    </T.Mesh>
+  {/if}
 
   <!-- Piano Legs -->
   <!-- Leg 1 (Front-Left) -->
@@ -813,7 +887,7 @@
   <!-- Emissive inner glow strip -->
   <T.Mesh position={[0, 2.08, 0.416]}>
     <T.BoxGeometry args={[0.56, 0.055, 0.01]} />
-    <T.MeshStandardMaterial color={0xfff8dc} emissive={0xfff8dc} emissiveIntensity={0.55} roughness={0.3} />
+    <T.MeshStandardMaterial color={0xfff8dc} emissive={telephoneLight ? 0xfff8dc : 0x000000} emissiveIntensity={telephoneLight ? 0.55 : 0} roughness={0.3} />
   </T.Mesh>
   <!-- Back face text panel -->
   <T.Mesh position={[0, 2.08, -0.415]} castShadow>
@@ -822,7 +896,7 @@
   </T.Mesh>
   <T.Mesh position={[0, 2.08, -0.416]}>
     <T.BoxGeometry args={[0.56, 0.055, 0.01]} />
-    <T.MeshStandardMaterial color={0xfff8dc} emissive={0xfff8dc} emissiveIntensity={0.55} roughness={0.3} />
+    <T.MeshStandardMaterial color={0xfff8dc} emissive={telephoneLight ? 0xfff8dc : 0x000000} emissiveIntensity={telephoneLight ? 0.55 : 0} roughness={0.3} />
   </T.Mesh>
   <!-- Right face text panel -->
   <T.Mesh position={[0.415, 2.08, 0]} castShadow>
@@ -831,7 +905,7 @@
   </T.Mesh>
   <T.Mesh position={[0.416, 2.08, 0]}>
     <T.BoxGeometry args={[0.01, 0.055, 0.56]} />
-    <T.MeshStandardMaterial color={0xfff8dc} emissive={0xfff8dc} emissiveIntensity={0.55} roughness={0.3} />
+    <T.MeshStandardMaterial color={0xfff8dc} emissive={telephoneLight ? 0xfff8dc : 0x000000} emissiveIntensity={telephoneLight ? 0.55 : 0} roughness={0.3} />
   </T.Mesh>
 
   <!-- ══════════════════════════════════════════════════════════ -->
@@ -1034,27 +1108,29 @@
     <T.SphereGeometry args={[0.038, 12, 12]} />
     <T.MeshStandardMaterial
       color={0xffee99}
-      emissive={0xffcc44}
-      emissiveIntensity={2.2}
+      emissive={telephoneLight ? 0xffcc44 : 0x000000}
+      emissiveIntensity={telephoneLight ? 2.2 : 0}
       roughness={0.1}
     />
   </T.Mesh>
   <!-- Warm amber interior light -->
-  <T.PointLight
-    position={[0, 2.2, 0]}
-    intensity={2.2}
-    distance={3.2}
-    decay={1.6}
-    color={0xffd060}
-  />
-  <!-- Subtle secondary fill from below (bounce) -->
-  <T.PointLight
-    position={[0, 0.5, 0]}
-    intensity={0.35}
-    distance={1.8}
-    decay={2.0}
-    color={0xff9933}
-  />
+  {#if telephoneLight}
+    <T.PointLight
+      position={[0, 2.2, 0]}
+      intensity={2.2}
+      distance={3.2}
+      decay={1.6}
+      color={0xffd060}
+    />
+    <!-- Subtle secondary fill from below (bounce) -->
+    <T.PointLight
+      position={[0, 0.5, 0]}
+      intensity={0.35}
+      distance={1.8}
+      decay={2.0}
+      color={0xff9933}
+    />
+  {/if}
 
   <!-- ══════════════════════════════════════════════════════════════ -->
   <!-- INTERIOR TELEPHONE — Detailed prop on back wall                -->

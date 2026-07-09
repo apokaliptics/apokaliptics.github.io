@@ -17,12 +17,12 @@
     4: { type: 'image', src: 'hcm3.jpg', title: 'Independence Palace' },
     5: { type: 'colorbars' },
     6: { type: 'image', src: 'landmark81.jpg', title: 'Landmark 81' },
-    7: { type: 'static' },
+    7: { type: 'youtube', title: 'The Fletcher Memorial Home' },
     8: { type: 'image', src: 'nhatrang.jpg', title: 'Nha Trang' },
-    9: { type: 'standby' },
+    9: { type: 'youtube', title: 'The Gunners Dream' },
     10: { type: 'image', src: 'vungtau.jpg', title: 'Vung Tau' },
     11: { type: 'lyrics', text: "I've got thirteen channels of shit on the T.V. to choose from...", source: "Nobody Home (1979)" },
-    12: { type: 'static' },
+    12: { type: 'youtube', title: 'The Final Cut' },
     13: { type: 'image', src: 'the_wall_characters.jpg', title: 'The Wall Cast' }
   };
 
@@ -90,36 +90,36 @@
         const img = loadedImages[chan.src];
         if (img) {
           // Draw image (cover/contain style)
-          const scale = Math.min(currentCanvas.width / img.width, (currentCanvas.height - 40) / img.height);
+          const scale = Math.min(currentCanvas.width / img.width, (currentCanvas.height - 55) / img.height);
           const w = img.width * scale;
           const h = img.height * scale;
           const x = (currentCanvas.width - w) / 2;
-          const y = (currentCanvas.height - 40 - h) / 2;
+          const y = (currentCanvas.height - 55 - h) / 2;
           currentCtx.drawImage(img, x, y, w, h);
         } else {
           // Loading...
           currentCtx.fillStyle = '#111';
-          currentCtx.fillRect(0, 0, currentCanvas.width, currentCanvas.height - 40);
+          currentCtx.fillRect(0, 0, currentCanvas.width, currentCanvas.height - 55);
           currentCtx.fillStyle = '#33ff33';
-          currentCtx.font = '20px monospace';
+          currentCtx.font = '28px monospace';
           currentCtx.textAlign = 'center';
           currentCtx.fillText('LOADING IMAGE...', currentCanvas.width / 2, currentCanvas.height / 2 - 10);
         }
 
         // Draw title footer bar
         currentCtx.fillStyle = '#080808';
-        currentCtx.fillRect(0, currentCanvas.height - 40, currentCanvas.width, 40);
+        currentCtx.fillRect(0, currentCanvas.height - 55, currentCanvas.width, 55);
         currentCtx.strokeStyle = '#181818';
         currentCtx.lineWidth = 2;
         currentCtx.beginPath();
-        currentCtx.moveTo(0, currentCanvas.height - 40);
-        currentCtx.lineTo(currentCanvas.width, currentCanvas.height - 40);
+        currentCtx.moveTo(0, currentCanvas.height - 55);
+        currentCtx.lineTo(currentCanvas.width, currentCanvas.height - 55);
         currentCtx.stroke();
 
         currentCtx.fillStyle = '#33ff33';
-        currentCtx.font = '16px monospace';
+        currentCtx.font = '24px monospace';
         currentCtx.textAlign = 'center';
-        currentCtx.fillText(chan.title.toUpperCase(), currentCanvas.width / 2, currentCanvas.height - 15);
+        currentCtx.fillText(chan.title.toUpperCase(), currentCanvas.width / 2, currentCanvas.height - 18);
 
       } else if (chan.type === 'colorbars') {
         // Draw SMPTE color bars
@@ -132,15 +132,15 @@
 
         // Test overlay
         currentCtx.fillStyle = 'rgba(0,0,0,0.85)';
-        currentCtx.fillRect(currentCanvas.width / 2 - 100, currentCanvas.height / 2 - 25, 200, 50);
+        currentCtx.fillRect(currentCanvas.width / 2 - 140, currentCanvas.height / 2 - 35, 280, 70);
         currentCtx.strokeStyle = '#cc0000';
         currentCtx.lineWidth = 3;
-        currentCtx.strokeRect(currentCanvas.width / 2 - 100, currentCanvas.height / 2 - 25, 200, 50);
+        currentCtx.strokeRect(currentCanvas.width / 2 - 140, currentCanvas.height / 2 - 35, 280, 70);
 
         currentCtx.fillStyle = '#ffffff';
-        currentCtx.font = '18px monospace';
+        currentCtx.font = '28px monospace';
         currentCtx.textAlign = 'center';
-        currentCtx.fillText('SMPTE TEST', currentCanvas.width / 2, currentCanvas.height / 2 + 6);
+        currentCtx.fillText('SMPTE TEST', currentCanvas.width / 2, currentCanvas.height / 2 + 10);
 
       } else if (chan.type === 'standby') {
         // Background
@@ -149,33 +149,33 @@
 
         // Circle
         currentCtx.strokeStyle = '#aaa';
-        currentCtx.lineWidth = 4;
+        currentCtx.lineWidth = 5;
         currentCtx.beginPath();
-        currentCtx.arc(currentCanvas.width / 2, currentCanvas.height / 2, 90, 0, Math.PI * 2);
+        currentCtx.arc(currentCanvas.width / 2, currentCanvas.height / 2, 130, 0, Math.PI * 2);
         currentCtx.stroke();
 
         // Crosshairs
-        currentCtx.lineWidth = 2;
+        currentCtx.lineWidth = 3;
         currentCtx.beginPath();
-        currentCtx.moveTo(currentCanvas.width / 2 - 90, currentCanvas.height / 2);
-        currentCtx.lineTo(currentCanvas.width / 2 + 90, currentCanvas.height / 2);
-        currentCtx.moveTo(currentCanvas.width / 2, currentCanvas.height / 2 - 90);
-        currentCtx.lineTo(currentCanvas.width / 2, currentCanvas.height / 2 + 90);
+        currentCtx.moveTo(currentCanvas.width / 2 - 130, currentCanvas.height / 2);
+        currentCtx.lineTo(currentCanvas.width / 2 + 130, currentCanvas.height / 2);
+        currentCtx.moveTo(currentCanvas.width / 2, currentCanvas.height / 2 - 130);
+        currentCtx.lineTo(currentCanvas.width / 2, currentCanvas.height / 2 + 130);
         currentCtx.stroke();
 
         // Banner box
         currentCtx.fillStyle = '#111';
-        currentCtx.fillRect(currentCanvas.width / 2 - 80, currentCanvas.height / 2 - 20, 160, 40);
+        currentCtx.fillRect(currentCanvas.width / 2 - 120, currentCanvas.height / 2 - 28, 240, 56);
         currentCtx.strokeStyle = '#cc0000';
         currentCtx.lineWidth = 2;
-        currentCtx.setLineDash([4, 4]);
-        currentCtx.strokeRect(currentCanvas.width / 2 - 80, currentCanvas.height / 2 - 20, 160, 40);
+        currentCtx.setLineDash([5, 5]);
+        currentCtx.strokeRect(currentCanvas.width / 2 - 120, currentCanvas.height / 2 - 28, 240, 56);
         currentCtx.setLineDash([]); // reset
 
         currentCtx.fillStyle = '#ffffff';
-        currentCtx.font = '14px monospace';
+        currentCtx.font = '22px monospace';
         currentCtx.textAlign = 'center';
-        currentCtx.fillText('PLEASE STAND BY', currentCanvas.width / 2, currentCanvas.height / 2 + 5);
+        currentCtx.fillText('PLEASE STAND BY', currentCanvas.width / 2, currentCanvas.height / 2 + 8);
 
       } else if (chan.type === 'lyrics') {
         currentCtx.fillStyle = '#080808';
@@ -183,7 +183,7 @@
 
         // Typographic text lines
         currentCtx.fillStyle = '#33ff33';
-        currentCtx.font = '16px monospace';
+        currentCtx.font = '24px monospace';
         currentCtx.textAlign = 'center';
 
         const lines = [
@@ -195,8 +195,54 @@
 
         lines.forEach((line, i) => {
           if (i === 3) currentCtx.fillStyle = '#00aa00';
-          currentCtx.fillText(line, currentCanvas.width / 2, currentCanvas.height / 2 - 40 + i * 25);
+          currentCtx.fillText(line, currentCanvas.width / 2, currentCanvas.height / 2 - 50 + i * 36);
         });
+      } else if (chan.type === 'youtube') {
+        currentCtx.fillStyle = '#181818';
+        currentCtx.fillRect(0, 0, currentCanvas.width, currentCanvas.height);
+
+        // Draw a stylized retro Youtube play button in the center
+        const btnW = 140;
+        const btnH = 98;
+        const btnX = (currentCanvas.width - btnW) / 2;
+        const btnY = (currentCanvas.height - btnH) / 2 - 35;
+        
+        // Red button background
+        currentCtx.fillStyle = '#ff0000';
+        currentCtx.beginPath();
+        if (currentCtx.roundRect) {
+          currentCtx.roundRect(btnX, btnY, btnW, btnH, 22);
+        } else {
+          currentCtx.rect(btnX, btnY, btnW, btnH);
+        }
+        currentCtx.fill();
+
+        // Play triangle (white)
+        currentCtx.fillStyle = '#ffffff';
+        currentCtx.beginPath();
+        currentCtx.moveTo(btnX + 52, btnY + 28);
+        currentCtx.lineTo(btnX + 52, btnY + 70);
+        currentCtx.lineTo(btnX + 96, btnY + 49);
+        currentCtx.closePath();
+        currentCtx.fill();
+
+        // Text info
+        currentCtx.fillStyle = '#ff3333';
+        currentCtx.font = '24px monospace';
+        currentCtx.textAlign = 'center';
+        currentCtx.fillText('YOUTUBE CHANNEL', currentCanvas.width / 2, currentCanvas.height - 110);
+
+        currentCtx.fillStyle = '#888888';
+        currentCtx.font = '18px monospace';
+        currentCtx.textAlign = 'center';
+        currentCtx.fillText('CLICK SCREEN TO WATCH', currentCanvas.width / 2, currentCanvas.height - 80);
+
+        // Draw title footer bar
+        currentCtx.fillStyle = '#080808';
+        currentCtx.fillRect(0, currentCanvas.height - 55, currentCanvas.width, 55);
+        currentCtx.fillStyle = '#33ff33';
+        currentCtx.font = '24px monospace';
+        currentCtx.fillText(chan.title.toUpperCase(), currentCanvas.width / 2, currentCanvas.height - 20);
       }
       untrack(() => onTextureUpdate());
     }
@@ -232,7 +278,7 @@
 
 <canvas
   bind:this={canvas}
-  width="320"
-  height="240"
+  width="550"
+  height="400"
   style="display: none;"
 ></canvas>
