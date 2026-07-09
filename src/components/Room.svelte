@@ -199,6 +199,35 @@
   </T.Mesh>
 </T.Group>
 
+<!-- Discarded Satin Shirt with Pinhole Burns (scattered on floor near Couch) -->
+<T.Group position={[-0.8, 0.0, 1.2]}>
+  <!-- Shirt Fabric Main (On floor) -->
+  <T.Mesh position={[0, 0.01, 0]} rotation={[0.05, 0.4, -0.02]} castShadow receiveShadow>
+    <T.BoxGeometry args={[0.26, 0.02, 0.22]} />
+    <T.MeshStandardMaterial color={0x1a365d} roughness={0.2} metalness={0.1} />
+  </T.Mesh>
+  <!-- Shirt Fabric Folded (Sleeve fold) -->
+  <T.Mesh position={[0.12, 0.008, -0.06]} rotation={[-0.05, -0.2, 0.05]} castShadow receiveShadow>
+    <T.BoxGeometry args={[0.22, 0.016, 0.12]} />
+    <T.MeshStandardMaterial color={0x1a365d} roughness={0.2} metalness={0.1} />
+  </T.Mesh>
+  <!-- Shirt Fabric Folded (Other side) -->
+  <T.Mesh position={[-0.1, 0.008, 0.08]} rotation={[0.1, 0.15, -0.1]} castShadow receiveShadow>
+    <T.BoxGeometry args={[0.18, 0.018, 0.18]} />
+    <T.MeshStandardMaterial color={0x1a365d} roughness={0.2} metalness={0.1} />
+  </T.Mesh>
+  
+  <!-- Pinhole Cigarette Burns (tiny flat black circles on chest/top box) -->
+  <T.Mesh position={[0.04, 0.021, 0.02]} rotation={[-Math.PI / 2, 0.4, 0]}>
+    <T.CircleGeometry args={[0.008, 8]} />
+    <T.MeshBasicMaterial color={0x000000} />
+  </T.Mesh>
+  <T.Mesh position={[-0.06, 0.021, -0.03]} rotation={[-Math.PI / 2, 0.4, 0]}>
+    <T.CircleGeometry args={[0.006, 8]} />
+    <T.MeshBasicMaterial color={0x000000} />
+  </T.Mesh>
+</T.Group>
+
 <!-- Retro Side Table -->
 <!-- Table Leg -->
 <T.Mesh position={[-1.3, 0.175, 1.8]} castShadow>
@@ -236,6 +265,30 @@
     <T.BoxGeometry args={[0.006, 0.003, 0.08]} />
     <T.MeshStandardMaterial color={0xdcdcdc} metalness={0.95} roughness={0.15} />
   </T.Mesh>
+  
+  <!-- Spoon Chain (interconnected torus rings) -->
+  <T.Group position={[0, 0.005, -0.05]}>
+    <!-- Ring 1 -->
+    <T.Mesh position={[0, -0.002, 0]} rotation={[Math.PI / 2, 0, 0]} castShadow>
+      <T.TorusGeometry args={[0.012, 0.003, 8, 16]} />
+      <T.MeshStandardMaterial color={0xdcdcdc} metalness={0.95} roughness={0.15} />
+    </T.Mesh>
+    <!-- Ring 2 -->
+    <T.Mesh position={[0, -0.004, -0.018]} rotation={[0, Math.PI / 2, 0]} castShadow>
+      <T.TorusGeometry args={[0.012, 0.003, 8, 16]} />
+      <T.MeshStandardMaterial color={0xdcdcdc} metalness={0.95} roughness={0.15} />
+    </T.Mesh>
+    <!-- Ring 3 -->
+    <T.Mesh position={[0.005, -0.006, -0.036]} rotation={[Math.PI / 2, 0, Math.PI / 4]} castShadow>
+      <T.TorusGeometry args={[0.012, 0.003, 8, 16]} />
+      <T.MeshStandardMaterial color={0xdcdcdc} metalness={0.95} roughness={0.15} />
+    </T.Mesh>
+    <!-- Ring 4 (spilling onto tabletop) -->
+    <T.Mesh position={[0.015, -0.008, -0.054]} rotation={[0, Math.PI / 4, 0]} castShadow>
+      <T.TorusGeometry args={[0.012, 0.003, 8, 16]} />
+      <T.MeshStandardMaterial color={0xdcdcdc} metalness={0.95} roughness={0.15} />
+    </T.Mesh>
+  </T.Group>
 </T.Group>
 <!-- Lamp Stem -->
 <T.Mesh position={[-1.3, 0.54, 1.8]} castShadow>
@@ -257,6 +310,20 @@
   color={0xffa726}
   castShadow
 />
+
+<!-- Baggy of Weed next to Ashtray -->
+<T.Group position={[-1.28, 0.392, 1.68]} rotation={[0, Math.PI / 6, 0]}>
+  <!-- Baggy (Outer Box) -->
+  <T.Mesh castShadow receiveShadow>
+    <T.BoxGeometry args={[0.07, 0.005, 0.07]} />
+    <T.MeshStandardMaterial color={0xffffff} roughness={0.1} transparent opacity={0.6} />
+  </T.Mesh>
+  <!-- Weed (Inner Box) -->
+  <T.Mesh position={[0, -0.0005, 0]}>
+    <T.BoxGeometry args={[0.045, 0.0035, 0.045]} />
+    <T.MeshStandardMaterial color={0x33691e} roughness={0.9} />
+  </T.Mesh>
+</T.Group>
 
 <!-- Ashtray and Smoking Cigarette on Side Table -->
 <T.Group position={[-1.42, 0.39, 1.70]}>
@@ -316,6 +383,52 @@
       </T.Mesh>
     {/if}
   {/each}
+</T.Group>
+
+<!-- Dog Bowl & Bone (on floor near TV Credenza) -->
+<T.Group position={[-0.6, 0.0, -1.3]}>
+  <!-- Dog Bowl Base -->
+  <T.Mesh position={[0, 0.004, 0]} castShadow receiveShadow>
+    <T.CylinderGeometry args={[0.08, 0.075, 0.008, 16]} />
+    <T.MeshStandardMaterial color={0x2c3e50} roughness={0.4} />
+  </T.Mesh>
+  <!-- Dog Bowl Rim -->
+  <T.Mesh position={[0, 0.018, 0]} rotation={[Math.PI / 2, 0, 0]} castShadow>
+    <T.TorusGeometry args={[0.068, 0.012, 8, 24]} />
+    <T.MeshStandardMaterial color={0x2c3e50} roughness={0.4} />
+  </T.Mesh>
+  <!-- Dog Food (Brown Kibble cylinder inside) -->
+  <T.Mesh position={[0, 0.01, 0]} castShadow>
+    <T.CylinderGeometry args={[0.062, 0.062, 0.012, 16]} />
+    <T.MeshStandardMaterial color={0x5d4037} roughness={0.9} />
+  </T.Mesh>
+  
+  <!-- Bone lying flat on the floor -->
+  <T.Group position={[0.15, 0.007, 0.05]} rotation={[0, Math.PI / 3, 0]}>
+    <!-- Central Shaft (lying along Z-axis) -->
+    <T.Mesh rotation={[Math.PI / 2, 0, 0]} castShadow>
+      <T.CylinderGeometry args={[0.006, 0.006, 0.04, 8]} />
+      <T.MeshStandardMaterial color={0xffffff} roughness={0.8} />
+    </T.Mesh>
+    <!-- End 1 Spheres (at Z = 0.02) -->
+    <T.Mesh position={[-0.006, 0, 0.02]} castShadow>
+      <T.SphereGeometry args={[0.007, 8, 8]} />
+      <T.MeshStandardMaterial color={0xffffff} roughness={0.8} />
+    </T.Mesh>
+    <T.Mesh position={[0.006, 0, 0.02]} castShadow>
+      <T.SphereGeometry args={[0.007, 8, 8]} />
+      <T.MeshStandardMaterial color={0xffffff} roughness={0.8} />
+    </T.Mesh>
+    <!-- End 2 Spheres (at Z = -0.02) -->
+    <T.Mesh position={[-0.006, 0, -0.02]} castShadow>
+      <T.SphereGeometry args={[0.007, 8, 8]} />
+      <T.MeshStandardMaterial color={0xffffff} roughness={0.8} />
+    </T.Mesh>
+    <T.Mesh position={[0.006, 0, -0.02]} castShadow>
+      <T.SphereGeometry args={[0.007, 8, 8]} />
+      <T.MeshStandardMaterial color={0xffffff} roughness={0.8} />
+    </T.Mesh>
+  </T.Group>
 </T.Group>
 
 <!-- Premium Wooden TV Table / Credenza -->
@@ -1225,6 +1338,11 @@
       <T.BoxGeometry args={[0.075, 0.12, 0.14]} />
       <T.MeshStandardMaterial color={0x52321c} roughness={0.8} />
     </T.Mesh>
+    <!-- Elastic Band keeping split sole together -->
+    <T.Mesh position={[0, 0.04, 0.01]} scale={[0.85, 1.1, 1]} castShadow>
+      <T.TorusGeometry args={[0.048, 0.003, 8, 24]} />
+      <T.MeshStandardMaterial color={0xd7ccc8} roughness={0.9} />
+    </T.Mesh>
   </T.Group>
 
   <!-- Right Boot (kicked off at an angle) -->
@@ -1238,6 +1356,11 @@
     <T.Mesh position={[0, 0.075, -0.01]} castShadow>
       <T.BoxGeometry args={[0.075, 0.12, 0.14]} />
       <T.MeshStandardMaterial color={0x52321c} roughness={0.8} />
+    </T.Mesh>
+    <!-- Elastic Band keeping split sole together -->
+    <T.Mesh position={[0, 0.04, 0.01]} scale={[0.85, 1.1, 1]} castShadow>
+      <T.TorusGeometry args={[0.048, 0.003, 8, 24]} />
+      <T.MeshStandardMaterial color={0xd7ccc8} roughness={0.9} />
     </T.Mesh>
   </T.Group>
 </T.Group>
