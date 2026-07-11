@@ -2,6 +2,7 @@
   import { T, useTask } from '@threlte/core';
   import { interactivity, HTML } from '@threlte/extras';
   import * as THREE from 'three';
+  import PinkFloydAlbums from './PinkFloydAlbums.svelte';
 
   // Enable Raycasting pointer events inside Canvas subtree
   interactivity();
@@ -23,6 +24,14 @@
     telephoneLight: boolean;
     tableLamp: boolean;
     couchSpotlight: boolean;
+    albumLights: boolean;
+    onAlbumHover?: (album: any | null) => void;
+    onAlbumClick?: (album: any) => void;
+    showAlbums?: boolean;
+    showCouchAndDesk?: boolean;
+    showTV?: boolean;
+    showTelephone?: boolean;
+    showPiano?: boolean;
   }
   let { 
     tvPower, 
@@ -40,7 +49,15 @@
     pianoLight,
     telephoneLight,
     tableLamp,
-    couchSpotlight
+    couchSpotlight,
+    albumLights,
+    onAlbumHover,
+    onAlbumClick,
+    showAlbums = true,
+    showCouchAndDesk = true,
+    showTV = true,
+    showTelephone = true,
+    showPiano = true
   }: Props = $props();
 
   let canvasTexture = $state<THREE.CanvasTexture | null>(null);
@@ -105,7 +122,7 @@
     }
   });
 
-  // Smoke particle system state
+  // Smoke particle system state (non-reactive)
   interface SmokeParticle {
     x: number;
     y: number;
@@ -115,18 +132,20 @@
     age: number;
   }
 
-  let smokeParticles = $state<SmokeParticle[]>(
-    Array.from({ length: 12 }, (_, i) => ({
-      x: 0.025,
-      y: 0.030,
-      z: 0.019,
-      scale: 0.005,
-      opacity: 0,
-      age: i * (2.0 / 12),
-    }))
-  );
+  const smokeParticles: SmokeParticle[] = Array.from({ length: 12 }, (_, i) => ({
+    x: 0.025,
+    y: 0.030,
+    z: 0.019,
+    scale: 0.005,
+    opacity: 0,
+    age: i * (2.0 / 12),
+  }));
 
   const tipLocalPos = { x: 0.025, y: 0.030, z: 0.019 };
+
+  // Keep references to Three.js elements directly to update them with 0 reactivity overhead
+  const particleMeshes: THREE.Mesh[] = [];
+  const particleMaterials: THREE.MeshBasicMaterial[] = [];
 
   // Rapid screen glow flicker for noise channels, stable glow for images, and update smoke particles
   useTask((delta) => {
@@ -174,9 +193,19 @@
           p.opacity = 0.55 * (1 - (t - 0.25) / 0.75);
         }
       }
+
+      // Update Three.js objects directly
+      const mesh = particleMeshes[i];
+      const mat = particleMaterials[i];
+      if (mesh) {
+        mesh.position.set(p.x, p.y, p.z);
+        mesh.scale.setScalar(p.scale);
+      }
+      if (mat) {
+        mat.opacity = p.opacity;
+        mat.visible = p.opacity > 0;
+      }
     }
-    // Trigger Svelte reactivity
-    smokeParticles = [...smokeParticles];
   });
 </script>
 
@@ -186,6 +215,7 @@
   <T.MeshStandardMaterial color={0x18181a} roughness={0.8} />
 </T.Mesh>
 
+{#if showCouchAndDesk}
 <!-- Retro Velvet Couch (Armchair size) -->
 <T.Group
   onclick={(e: any) => { e.stopPropagation(); onBookClick?.(); }}
@@ -225,7 +255,6 @@
     distance={6}
     decay={1.2}
     color={0xfffad0}
-    castShadow
   />
 
   <!-- Volumetric Spotlight Cone for Couch -->
@@ -356,7 +385,6 @@
     distance={4}
     decay={1.5}
     color={0xffa726}
-    castShadow
   />
 {/if}
 
@@ -419,18 +447,21 @@
   </T.Group>
 
   <!-- Smoke Particles (rising straight up in Ashtray's coordinate space) -->
-  {#each smokeParticles as p, idx (idx)}
-    {#if p.opacity > 0}
-      <T.Mesh position={[p.x, p.y, p.z]}>
-        <T.SphereGeometry args={[p.scale, 8, 8]} />
-        <T.MeshBasicMaterial
-          color={0xdddddd}
-          transparent
-          opacity={p.opacity}
-          depthWrite={false}
-        />
-      </T.Mesh>
-    {/if}
+  {#each smokeParticles as p, idx}
+    <T.Mesh 
+      position={[p.x, p.y, p.z]}
+      scale={p.scale}
+      bind:ref={particleMeshes[idx]}
+    >
+      <T.SphereGeometry args={[1, 8, 8]} />
+      <T.MeshBasicMaterial
+        bind:ref={particleMaterials[idx]}
+        color={0xdddddd}
+        transparent
+        opacity={p.opacity}
+        depthWrite={false}
+      />
+    </T.Mesh>
   {/each}
 </T.Group>
 
@@ -479,7 +510,9 @@
     </T.Mesh>
   </T.Group>
 </T.Group>
+{/if}
 
+{#if showTV}
 <!-- Premium Wooden TV Table / Credenza -->
 <!-- Legs -->
 <T.Mesh position={[-1.0, 0.05, -1.45]} castShadow>
@@ -599,10 +632,11 @@
     distance={5}
     decay={1.8}
     color={tvChannel === 11 ? 0x33ff33 : (tvChannel === 5 ? 0xffeb3b : 0xffffff)}
-    castShadow
   />
 {/if}
+{/if}
 
+{#if showPiano}
 <!-- Grand Piano in the Outfar -->
 <T.Group
   position={[-3.2, 0, -2.5]}
@@ -622,7 +656,6 @@
       distance={6}
       decay={1.2}
       color={0xfffad0}
-      castShadow
     />
 
     <!-- Volumetric Spotlight Cone -->
@@ -733,6 +766,7 @@
     </T.Mesh>
   {/if}
 </T.Group>
+{/if}
 
 <!-- "Nobody Home" Props -->
 
@@ -753,6 +787,7 @@
     -X = right side (window)
   ══════════════════════════════════════════════════════════════
 -->
+{#if showTelephone}
 <T.Group
   position={[-2.6, 0, 2.55]}
   rotation={[0, Math.PI / 8, 0]}
@@ -1334,8 +1369,10 @@
   </T.Mesh>
 
 </T.Group>
+{/if}
 
 
+{#if showCouchAndDesk}
 <!-- 2. Little Black Book (on Couch Seat Cushion) -->
 <T.Group position={[0.3, 0.295, 1.75]} rotation={[0, 0.25, 0.02]}>
   <!-- Leather Cover -->
@@ -1440,4 +1477,10 @@
     </T.Mesh>
   </T.Group>
 </T.Group>
+{/if}
+
+<!-- Pink Floyd Albums Exhibit -->
+{#if showAlbums}
+<PinkFloydAlbums {albumLights} {onAlbumHover} {onAlbumClick} />
+{/if}
 

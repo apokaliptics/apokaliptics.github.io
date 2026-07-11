@@ -15,7 +15,7 @@
   let introCompleted = $state(false);
   let showWallIntro = $state(false);
   let showApp = $state(false);
-  let cameraMode = $state<'free' | 'poem' | 'piano' | 'telephone' | 'tv'>('free');
+  let cameraMode = $state<'menu' | 'free' | 'poem' | 'piano' | 'telephone' | 'tv'>('free');
   let resetTrigger = $state(0);
   let activeModal = $state<'none' | 'telephone' | 'poem' | 'piano'>('none');
 
@@ -32,6 +32,7 @@
   let telephoneLight = $state(true);
   let tableLamp = $state(true);
   let couchSpotlight = $state(true);
+  let albumLights = $state(true);
   let canvasElement = $state<HTMLCanvasElement | null>(null);
   let textureUpdateTrigger = $state(0);
 
@@ -49,6 +50,21 @@
   // TV Controls dial state
   let knobRotation = $state(0);
   let introTimer: ReturnType<typeof setTimeout> | null = null;
+
+  // Album plaque states
+  let hoveredAlbum = $state<any | null>(null);
+  let selectedAlbum = $state<any | null>(null);
+
+  // Room Element visibility states
+  let showAlbums = $state(true);
+  let showCouchAndDesk = $state(true);
+  let showTV = $state(true);
+  let showTelephone = $state(true);
+  let showPiano = $state(true);
+
+  // Panel drawer states
+  let activePanel = $state<'none' | 'tv' | 'lights' | 'elements'>('none');
+  let showCreditModal = $state(false);
 
   // Automatically pause the "Nobody Home" background music when a YouTube video is playing, and resume it when TV is off or tuned away.
   $effect(() => {
@@ -72,6 +88,14 @@
       // Ignore key events if focused on input elements (like the volume slider)
       if (document.activeElement?.tagName === 'INPUT') return;
 
+      // In free camera mode, let WASD and arrow keys control the camera instead of switching modes
+      if (cameraMode === 'free') {
+        const key = e.key.toLowerCase();
+        if (['w', 'a', 's', 'd', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(key)) {
+          return;
+        }
+      }
+
       if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
         nextCamera();
       } else if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
@@ -92,13 +116,29 @@
 
   function handleIntroComplete() {
     introCompleted = true;
-    showWallIntro = true;
+    cameraMode = 'menu';
   }
 
-  function enterApp() {
-    showWallIntro = false;
-    showApp = true;
+  function actionEnterRoom() {
+    cameraMode = 'free';
     playMusic();
+  }
+
+  function actionFreeView() {
+    cameraMode = 'free';
+    playMusic();
+  }
+
+  function actionShowCredit() {
+    showCreditModal = true;
+  }
+
+  function togglePanel(panel: 'tv' | 'lights' | 'elements') {
+    if (activePanel === panel) {
+      activePanel = 'none';
+    } else {
+      activePanel = panel;
+    }
   }
 
   function playMusic() {
@@ -147,7 +187,7 @@
     textureUpdateTrigger += 1;
   }
 
-  const cameras: Array<'free' | 'poem' | 'piano' | 'telephone' | 'tv'> = ['free', 'poem', 'piano', 'telephone', 'tv'];
+  const cameras: Array<'menu' | 'free' | 'poem' | 'piano' | 'telephone' | 'tv'> = ['free', 'poem', 'piano', 'telephone', 'tv'];
 
   function nextCamera() {
     const idx = cameras.indexOf(cameraMode);
@@ -197,17 +237,10 @@
 
 {#if !introCompleted}
   <StartupWall onComplete={handleIntroComplete} />
-{:else if showWallIntro}
+{:else}
   <!-- svelte-ignore a11y_click_events_have_key_events -->
   <!-- svelte-ignore a11y_no_static_element_interactions -->
-  <div class="wall-intro" transition:fade={{ duration: 500 }} onclick={enterApp} style="cursor: pointer;">
-    <div class="wall-intro-card">
-      <span>welcome to my wall</span>
-      <div class="enter-subtext">click to enter</div>
-    </div>
-  </div>
-{:else if showApp}
-  <div class="app-main" transition:fade={{ duration: 400 }}>
+  <div class="app-main" transition:fade={{ duration: 400 }} onclick={() => { selectedAlbum = null; }}>
     <!-- 3D Canvas Background -->
     <Scene
       {tvPower}
@@ -228,7 +261,39 @@
       {telephoneLight}
       {tableLamp}
       {couchSpotlight}
+      {albumLights}
+      onAlbumHover={(album) => hoveredAlbum = album}
+      onAlbumClick={(album) => {
+        if (selectedAlbum?.title === album.title) {
+          selectedAlbum = null;
+        } else {
+          selectedAlbum = album;
+        }
+      }}
+      {showAlbums}
+      {showCouchAndDesk}
+      {showTV}
+      {showTelephone}
+      {showPiano}
     />
+
+    {#if hoveredAlbum || selectedAlbum}
+      {@const activeAlbum = hoveredAlbum || selectedAlbum}
+      <!-- svelte-ignore a11y_click_events_have_key_events -->
+      <!-- svelte-ignore a11y_no_static_element_interactions -->
+      <div class="album-plaque-overlay" transition:fade={{ duration: 200 }} onclick={(e) => e.stopPropagation()}>
+        {#if activeAlbum === selectedAlbum}
+          <button class="plaque-close-btn" onclick={() => selectedAlbum = null} aria-label="Close Plaque">&times;</button>
+        {/if}
+        <img class="plaque-cover-img" src={`${baseUrl}pink floyd albums/${activeAlbum.fileName}`} alt={activeAlbum.title} />
+        <div class="plaque-title">{activeAlbum.title}</div>
+        <div class="plaque-year">{activeAlbum.year}</div>
+        <div class="plaque-desc">{activeAlbum.description}</div>
+        {#if activeAlbum !== selectedAlbum}
+          <div class="plaque-hint">Click album to lock display</div>
+        {/if}
+      </div>
+    {/if}
 
     <!-- Offscreen canvas drawers -->
     <TVContent
@@ -246,133 +311,245 @@
       onTextureUpdate={triggerSheetUpdate}
     />
 
-    <!-- Top Navigation Bar HUD -->
-    <nav class="navbar-overlay">
-      <a href={baseUrl} class="logo-link" onclick={(e) => { e.preventDefault(); toggleMusic(); }} title="Toggle Background Music">
-        <img src={`${baseUrl}brick-logo.png`} alt="Brick Logo" class="logo-img" class:pulse={musicPlaying}>
-      </a>
-
-      <ul class="nav-links">
-        <li><button onclick={() => selectCamera('poem')} class:active={cameraMode === 'poem'}>Welcome</button></li>
-        <li><button onclick={() => selectCamera('tv')} class:active={cameraMode === 'tv'}>Projects</button></li>
-        <li><button onclick={() => selectCamera('piano')} class:active={cameraMode === 'piano'}>Music</button></li>
-        <li><button onclick={() => selectCamera('telephone')} class:active={cameraMode === 'telephone'}>Telephone</button></li>
-      </ul>
-
-      <div class="controls-right">
-        <!-- Camera tour controls -->
-        <div class="camera-tour-controls">
-          <button class="tour-btn" onclick={prevCamera} aria-label="Previous camera">&lt;</button>
-          <span class="tour-label">
-            {cameraMode === 'free' ? 'FREE VIEW' :
-             cameraMode === 'poem' ? 'POEM CAM' :
-             cameraMode === 'piano' ? 'PIANO CAM' :
-             cameraMode === 'telephone' ? 'TELEPHONE CAM' :
-             'TV CAM'}
-          </span>
-          <button class="tour-btn" onclick={nextCamera} aria-label="Next camera">&gt;</button>
-        </div>
-
-        <!-- Volume controller -->
-        <div class="volume-container">
-          <button class="volume-toggle" class:muted={isMuted} onclick={toggleMute} title="Mute/Unmute">
-            <div class="volume-bar"></div>
-            <div class="volume-bar"></div>
-            <div class="volume-bar"></div>
-          </button>
-          <input type="range" class="volume-slider" min="0" max="1" step="0.01" value={isMuted ? 0 : musicVolume} oninput={handleVolumeChange}>
-        </div>
-      </div>
-    </nav>
-
-    <!-- TV Control Panel (Interactive HUD) -->
-    <div class="tv-hud-controls" class:minimized={cameraMode === 'tv'}>
-      <h3 class="hud-title">TV DASHBOARD</h3>
-      
-      <div class="hud-row">
-        <!-- Power Switch -->
-        <div class="hud-control-group">
-          <label for="hud-power-switch">POWER</label>
-          <button id="hud-power-switch" class="tv-power-switch" class:on={tvPower} onclick={toggleTVPower} aria-label="Toggle TV Power">
-            <span class="switch-knob"></span>
-          </button>
-        </div>
-
-        <!-- Channel display -->
-        <div class="hud-control-group">
-          <label for="hud-channel-screen">CHANNEL</label>
-          <div id="hud-channel-screen" class="tv-channel-display">{tvPower ? (tvChannel < 10 ? '0' + tvChannel : tvChannel) : '--'}</div>
-        </div>
-
-        <!-- Knob dial -->
-        <div class="hud-control-group">
-          <label for="hud-knob">DIAL</label>
-          <button id="hud-knob" class="tv-knob" style="transform: rotate({knobRotation}deg)" onclick={rotateChannel} aria-label="Rotate TV Channel">
-            <span class="knob-line"></span>
-          </button>
-        </div>
-      </div>
-
-      <!-- Quick select channel grids -->
-      <div class="hud-channel-grid">
-        {#each Array.from({ length: 13 }, (_, idx) => idx + 1) as chanNum (chanNum)}
-          <button class="hud-channel-btn" class:active={tvChannel === chanNum && tvPower} onclick={() => setChannel(chanNum)}>
-            {chanNum}
-          </button>
-        {/each}
-      </div>
-    </div>
-
-    <!-- Electric Light Control Panel (Interactive HUD) -->
-    <div class="light-hud-controls" class:minimized={cameraMode === 'poem'}>
-      <h3 class="hud-title">ELECTRIC LIGHTS</h3>
-      
-      <div class="light-rows-container">
-        <!-- Piano Spotlight -->
-        <div class="light-row">
-          <span class="light-label">PIANO SPOT</span>
-          <div class="light-control-wrapper">
-            <span class="light-led" class:on={pianoLight}></span>
-            <button class="light-switch" class:on={pianoLight} onclick={() => pianoLight = !pianoLight} aria-label="Toggle Piano Spotlight">
-              <span class="switch-knob"></span>
+    <!-- Game Start Menu Overlay -->
+    {#if cameraMode === 'menu'}
+      <!-- svelte-ignore a11y_click_events_have_key_events -->
+      <!-- svelte-ignore a11y_no_static_element_interactions -->
+      <div class="game-menu-overlay" transition:fade={{ duration: 300 }} onclick={(e) => e.stopPropagation()}>
+        <div class="game-menu-card">
+          <h1 class="game-title">is there anybody out there?</h1>
+          <p class="game-subtitle">Welcome to apokaliptics' personal wall</p>
+          
+          <div class="menu-options">
+            <button class="menu-btn" onclick={actionEnterRoom}>
+              <span class="btn-arrow">&gt;</span> ENTER ROOM
             </button>
-          </div>
-        </div>
-
-        <!-- Telephone Light -->
-        <div class="light-row">
-          <span class="light-label">PHONE BOOTH</span>
-          <div class="light-control-wrapper">
-            <span class="light-led" class:on={telephoneLight}></span>
-            <button class="light-switch" class:on={telephoneLight} onclick={() => telephoneLight = !telephoneLight} aria-label="Toggle Telephone Light">
-              <span class="switch-knob"></span>
+            <button class="menu-btn" onclick={actionFreeView}>
+              <span class="btn-arrow">&gt;</span> FREE VIEW
             </button>
-          </div>
-        </div>
-
-        <!-- Table Lamp -->
-        <div class="light-row">
-          <span class="light-label">TABLE LAMP</span>
-          <div class="light-control-wrapper">
-            <span class="light-led" class:on={tableLamp}></span>
-            <button class="light-switch" class:on={tableLamp} onclick={() => tableLamp = !tableLamp} aria-label="Toggle Table Lamp">
-              <span class="switch-knob"></span>
-            </button>
-          </div>
-        </div>
-
-        <!-- Couch Spotlight -->
-        <div class="light-row">
-          <span class="light-label">COUCH SPOT</span>
-          <div class="light-control-wrapper">
-            <span class="light-led" class:on={couchSpotlight}></span>
-            <button class="light-switch" class:on={couchSpotlight} onclick={() => couchSpotlight = !couchSpotlight} aria-label="Toggle Couch Spotlight">
-              <span class="switch-knob"></span>
+            <button class="menu-btn" onclick={actionShowCredit}>
+              <span class="btn-arrow">&gt;</span> CREDITS
             </button>
           </div>
         </div>
       </div>
-    </div>
+
+      {#if showCreditModal}
+        <!-- svelte-ignore a11y_click_events_have_key_events -->
+        <!-- svelte-ignore a11y_no_static_element_interactions -->
+        <div class="menu-credits-overlay" transition:fade={{ duration: 250 }} onclick={() => showCreditModal = false}>
+          <div class="credits-card" onclick={(e) => e.stopPropagation()}>
+            <button class="close-credits-btn" onclick={() => showCreditModal = false}>&times;</button>
+            <h2 class="credits-title">PROJECT CREDITS</h2>
+            <div class="credits-content">
+              <p class="credits-author">CREATED BY KIET MINH</p>
+              <p class="credits-target">TARGET: APOKALIPTICS</p>
+              <p class="credits-dedication">Inspired by Pink Floyd's "The Wall" (1979) and the track "Nobody Home". Built with Svelte 5, Threlte, and Three.js.</p>
+            </div>
+          </div>
+        </div>
+      {/if}
+    {/if}
+
+    {#if cameraMode !== 'menu'}
+      <!-- Top Navigation Bar HUD -->
+      <nav class="navbar-overlay">
+        <a href={baseUrl} class="logo-link" onclick={(e) => { e.preventDefault(); toggleMusic(); }} title="Toggle Background Music">
+          <img src={`${baseUrl}brick-logo.png`} alt="Brick Logo" class="logo-img" class:pulse={musicPlaying}>
+        </a>
+
+        <ul class="nav-links">
+          <li><button onclick={() => selectCamera('poem')} class:active={cameraMode === 'poem'}>Welcome</button></li>
+          <li><button onclick={() => selectCamera('tv')} class:active={cameraMode === 'tv'}>Projects</button></li>
+          <li><button onclick={() => selectCamera('piano')} class:active={cameraMode === 'piano'}>Music</button></li>
+          <li><button onclick={() => selectCamera('telephone')} class:active={cameraMode === 'telephone'}>Telephone</button></li>
+        </ul>
+
+        <div class="controls-right">
+          <!-- Camera tour controls -->
+          <div class="camera-tour-controls">
+            <button class="tour-btn" onclick={prevCamera} aria-label="Previous camera">&lt;</button>
+            <span class="tour-label">
+              {cameraMode === 'free' ? 'FREE VIEW' :
+               cameraMode === 'poem' ? 'POEM CAM' :
+               cameraMode === 'piano' ? 'PIANO CAM' :
+               cameraMode === 'telephone' ? 'TELEPHONE CAM' :
+               'TV CAM'}
+            </span>
+            <button class="tour-btn" onclick={nextCamera} aria-label="Next camera">&gt;</button>
+          </div>
+
+          <!-- Volume controller -->
+          <div class="volume-container">
+            <button class="volume-toggle" class:muted={isMuted} onclick={toggleMute} title="Mute/Unmute">
+              <div class="volume-bar"></div>
+              <div class="volume-bar"></div>
+              <div class="volume-bar"></div>
+            </button>
+            <input type="range" class="volume-slider" min="0" max="1" step="0.01" value={isMuted ? 0 : musicVolume} oninput={handleVolumeChange}>
+          </div>
+        </div>
+      </nav>
+
+      <!-- Unified Slide-out HUD panels on the right edge -->
+      <!-- svelte-ignore a11y_click_events_have_key_events -->
+      <!-- svelte-ignore a11y_no_static_element_interactions -->
+      <div class="hud-drawer-container" onclick={(e) => e.stopPropagation()}>
+        <!-- Tab Columns -->
+        <div class="hud-tabs-column">
+          <button class="hud-tab-btn" class:active={activePanel === 'tv'} onclick={() => togglePanel('tv')} title="TV Control Dashboard">
+            📺 <span class="tab-label">TV</span>
+          </button>
+          <button class="hud-tab-btn" class:active={activePanel === 'lights'} onclick={() => togglePanel('lights')} title="Electric Lights Switchboard">
+            💡 <span class="tab-label">LIGHTS</span>
+          </button>
+          <button class="hud-tab-btn" class:active={activePanel === 'elements'} onclick={() => togglePanel('elements')} title="Scene Elements Toggles">
+            👁️ <span class="tab-label">OBJECTS</span>
+          </button>
+        </div>
+
+        <!-- Drawer Content Container -->
+        <div class="hud-drawer-content" class:open={activePanel !== 'none'}>
+          {#if activePanel === 'tv'}
+            <div class="panel-content tv-panel">
+              <h3 class="panel-title">TV DASHBOARD</h3>
+              
+              <div class="panel-row">
+                <!-- Power Switch -->
+                <div class="panel-control-group">
+                  <label for="hud-power-switch">POWER</label>
+                  <button id="hud-power-switch" class="tv-power-switch" class:on={tvPower} onclick={toggleTVPower} aria-label="Toggle TV Power">
+                    <span class="switch-knob"></span>
+                  </button>
+                </div>
+
+                <!-- Channel display -->
+                <div class="panel-control-group">
+                  <label for="hud-channel-screen">CHANNEL</label>
+                  <div id="hud-channel-screen" class="tv-channel-display">{tvPower ? (tvChannel < 10 ? '0' + tvChannel : tvChannel) : '--'}</div>
+                </div>
+
+                <!-- Knob dial -->
+                <div class="panel-control-group">
+                  <label for="hud-knob">DIAL</label>
+                  <button id="hud-knob" class="tv-knob" style="transform: rotate({knobRotation}deg)" onclick={rotateChannel} aria-label="Rotate TV Channel">
+                    <span class="knob-line"></span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Quick select channel grids -->
+              <div class="panel-channel-grid">
+                {#each Array.from({ length: 13 }, (_, idx) => idx + 1) as chanNum (chanNum)}
+                  <button class="panel-channel-btn" class:active={tvChannel === chanNum && tvPower} onclick={() => setChannel(chanNum)}>
+                    {chanNum}
+                  </button>
+                {/each}
+              </div>
+            </div>
+
+          {:else if activePanel === 'lights'}
+            <div class="panel-content lights-panel">
+              <h3 class="panel-title">ELECTRIC LIGHTS</h3>
+              
+              <div class="light-rows-container">
+                <!-- Piano Spotlight -->
+                <div class="light-row">
+                  <span class="light-label">PIANO SPOT</span>
+                  <div class="light-control-wrapper">
+                    <span class="light-led" class:on={pianoLight}></span>
+                    <button class="light-switch" class:on={pianoLight} onclick={() => pianoLight = !pianoLight} aria-label="Toggle Piano Spotlight">
+                      <span class="switch-knob"></span>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Telephone Light -->
+                <div class="light-row">
+                  <span class="light-label">PHONE BOOTH</span>
+                  <div class="light-control-wrapper">
+                    <span class="light-led" class:on={telephoneLight}></span>
+                    <button class="light-switch" class:on={telephoneLight} onclick={() => telephoneLight = !telephoneLight} aria-label="Toggle Telephone Light">
+                      <span class="switch-knob"></span>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Table Lamp -->
+                <div class="light-row">
+                  <span class="light-label">TABLE LAMP</span>
+                  <div class="light-control-wrapper">
+                    <span class="light-led" class:on={tableLamp}></span>
+                    <button class="light-switch" class:on={tableLamp} onclick={() => tableLamp = !tableLamp} aria-label="Toggle Table Lamp">
+                      <span class="switch-knob"></span>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Couch Spotlight -->
+                <div class="light-row">
+                  <span class="light-label">COUCH SPOT</span>
+                  <div class="light-control-wrapper">
+                    <span class="light-led" class:on={couchSpotlight}></span>
+                    <button class="light-switch" class:on={couchSpotlight} onclick={() => couchSpotlight = !couchSpotlight} aria-label="Toggle Couch Spotlight">
+                      <span class="switch-knob"></span>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Album Spotlight -->
+                <div class="light-row">
+                  <span class="light-label">ALBUM LIGHTS</span>
+                  <div class="light-control-wrapper">
+                    <span class="light-led" class:on={albumLights}></span>
+                    <button class="light-switch" class:on={albumLights} onclick={() => albumLights = !albumLights} aria-label="Toggle Album Lights">
+                      <span class="switch-knob"></span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          {:else if activePanel === 'elements'}
+            <div class="panel-content elements-panel">
+              <h3 class="panel-title">ROOM OBJECTS</h3>
+              
+              <div class="elements-list-container">
+                <label class="element-checkbox-row">
+                  <input type="checkbox" bind:checked={showAlbums}>
+                  <span class="checkbox-custom"></span>
+                  <span class="checkbox-label">ALBUMS DISPLAY</span>
+                </label>
+                
+                <label class="element-checkbox-row">
+                  <input type="checkbox" bind:checked={showCouchAndDesk}>
+                  <span class="checkbox-custom"></span>
+                  <span class="checkbox-label">COUCH & TABLE</span>
+                </label>
+                
+                <label class="element-checkbox-row">
+                  <input type="checkbox" bind:checked={showTV}>
+                  <span class="checkbox-custom"></span>
+                  <span class="checkbox-label">TV CREDENZA</span>
+                </label>
+                
+                <label class="element-checkbox-row">
+                  <input type="checkbox" bind:checked={showTelephone}>
+                  <span class="checkbox-custom"></span>
+                  <span class="checkbox-label">TELEPHONE BOOTH</span>
+                </label>
+                
+                <label class="element-checkbox-row">
+                  <input type="checkbox" bind:checked={showPiano}>
+                  <span class="checkbox-custom"></span>
+                  <span class="checkbox-label">GRAND PIANO</span>
+                </label>
+              </div>
+            </div>
+          {/if}
+        </div>
+      </div>
+    {/if}
 
     <!-- Action buttons inside camera modes -->
     {#if cameraMode === 'telephone' && activeModal === 'none'}
@@ -518,40 +695,7 @@
     overflow: hidden;
   }
 
-  .wall-intro {
-    width: 100vw;
-    height: 100vh;
-    display: grid;
-    place-items: center;
-    background: rgba(0, 0, 0, 0.78);
-    color: #f4f0e8;
-    text-transform: lowercase;
-    letter-spacing: 0.22em;
-    font-family: 'Permanent Marker', cursive;
-  }
 
-  .wall-intro-card {
-    padding: 22px 34px;
-    background: rgba(0, 0, 0, 0.36);
-    box-shadow: 0 0 60px rgba(0, 0, 0, 0.45);
-    backdrop-filter: blur(2px);
-    font-size: clamp(1.8rem, 3vw, 3.1rem);
-    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.6);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .enter-subtext {
-    font-size: 1rem;
-    color: #888;
-    margin-top: 15px;
-    text-align: center;
-    letter-spacing: 0.1em;
-    font-family: 'Cutive Mono', monospace;
-    text-transform: uppercase;
-    animation: pulse-slow 2s infinite;
-  }
 
   @keyframes pulse-slow {
     0%, 100% { opacity: 0.4; }
@@ -705,61 +849,7 @@
     accent-color: #00ff66;
   }
 
-  /* HUD dashboard overlays */
-  .tv-hud-controls {
-    position: absolute;
-    bottom: 25px;
-    right: 25px;
-    z-index: 10;
-    background: linear-gradient(135deg, #1b1b1b 0%, #0d0d0d 100%);
-    border: 4px solid #000;
-    box-shadow: 8px 8px 0px #000, inset 1px 1px 2px rgba(255,255,255,0.1);
-    padding: 20px;
-    border-radius: 8px;
-    max-width: 320px;
-    box-sizing: border-box;
-    transition: opacity 0.3s, transform 0.3s;
-  }
 
-  .tv-hud-controls.minimized {
-    opacity: 0.25;
-  }
-
-  .tv-hud-controls.minimized:hover {
-    opacity: 1;
-  }
-
-  .hud-title {
-    font-family: 'Special Elite', monospace;
-    font-size: 1rem;
-    color: #666;
-    margin: 0 0 15px 0;
-    border-bottom: 2px double #333;
-    padding-bottom: 5px;
-    text-align: center;
-    letter-spacing: 1px;
-  }
-
-  .hud-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 15px;
-    gap: 15px;
-  }
-
-  .hud-control-group {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 5px;
-  }
-
-  .hud-control-group label {
-    font-family: 'Special Elite', monospace;
-    font-size: 0.75rem;
-    color: #555;
-  }
 
   /* HUD Power switch */
   .tv-power-switch {
@@ -828,37 +918,7 @@
     border-radius: 1.5px;
   }
 
-  /* Channel Grid */
-  .hud-channel-grid {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 5px;
-    border-top: 2px solid #222;
-    padding-top: 15px;
-  }
 
-  .hud-channel-btn {
-    font-family: 'Special Elite', monospace;
-    font-size: 0.75rem;
-    color: #777;
-    background: #0f0f0f;
-    border: 1px solid #222;
-    padding: 4px 0;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-
-  .hud-channel-btn:hover {
-    color: #fff;
-    background: #1a1a1a;
-  }
-
-  .hud-channel-btn.active {
-    color: #fff;
-    background: #cc0000;
-    border-color: #ff3333;
-    text-shadow: 0 0 3px #fff;
-  }
 
   /* Credit HUD Footer */
   .site-credit {
@@ -874,29 +934,7 @@
     z-index: 5;
   }
 
-  /* Light HUD dashboard overlay */
-  .light-hud-controls {
-    position: absolute;
-    bottom: 35px;
-    left: 25px;
-    z-index: 10;
-    background: linear-gradient(135deg, #1b1b1b 0%, #0d0d0d 100%);
-    border: 4px solid #000;
-    box-shadow: 8px 8px 0px #000, inset 1px 1px 2px rgba(255,255,255,0.1);
-    padding: 20px;
-    border-radius: 8px;
-    min-width: 260px;
-    box-sizing: border-box;
-    transition: opacity 0.3s, transform 0.3s;
-  }
 
-  .light-hud-controls.minimized {
-    opacity: 0.25;
-  }
-
-  .light-hud-controls.minimized:hover {
-    opacity: 1;
-  }
 
   .light-rows-container {
     display: flex;
@@ -1328,21 +1366,507 @@
     }
   }
 
-  /* Responsive styles overlay */
+  /* Album Plaque 2D HUD Card */
+  .album-plaque-overlay {
+    position: absolute;
+    top: 110px;
+    right: 25px;
+    z-index: 20;
+    width: 320px;
+    box-sizing: border-box;
+    padding: 18px;
+    background: rgba(16, 14, 12, 0.94);
+    border: 2px solid #c5a059;
+    border-radius: 6px;
+    color: #f5f0e0;
+    font-family: 'Space Grotesk', sans-serif;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.95);
+    backdrop-filter: blur(8px);
+    pointer-events: auto;
+    animation: slide-in 0.25s ease-out;
+  }
+
+  .album-plaque-overlay .plaque-cover-img {
+    width: 140px;
+    height: 140px;
+    object-fit: cover;
+    margin: 0 auto 12px auto;
+    display: block;
+    border: 1px solid rgba(197, 160, 89, 0.4);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+  }
+
+  @keyframes slide-in {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .album-plaque-overlay .plaque-title {
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #ffd700;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    line-height: 1.3;
+    border-bottom: 1px double rgba(197, 160, 89, 0.5);
+    padding-bottom: 8px;
+    margin-top: 5px;
+  }
+
+  .album-plaque-overlay .plaque-year {
+    font-size: 0.85rem;
+    color: #bfa883;
+    margin-bottom: 12px;
+    font-style: italic;
+  }
+
+  .album-plaque-overlay .plaque-desc {
+    font-size: 0.75rem;
+    line-height: 1.5;
+    color: #e3dec9;
+    text-align: left;
+    margin-bottom: 8px;
+  }
+
+  .album-plaque-overlay .plaque-hint {
+    font-size: 0.65rem;
+    color: #888;
+    margin-top: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-top: 1px dashed rgba(255, 255, 255, 0.1);
+    padding-top: 8px;
+  }
+
+  .album-plaque-overlay .plaque-close-btn {
+    position: absolute;
+    top: 6px;
+    right: 12px;
+    background: none;
+    border: none;
+    color: #c5a059;
+    font-size: 1.6rem;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0;
+    transition: color 0.2s;
+  }
+
+  .album-plaque-overlay .plaque-close-btn:hover {
+    color: #ffd700;
+  }
+
+  /* Game menu styles */
+  .game-menu-overlay {
+    position: absolute;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    z-index: 100;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    background: transparent;
+    pointer-events: none;
+  }
+
+  .game-menu-card {
+    background: transparent;
+    border: none;
+    padding: 40px 80px;
+    text-align: right;
+    box-shadow: none;
+    max-width: 600px;
+    width: auto;
+    box-sizing: border-box;
+    font-family: 'Special Elite', monospace;
+    color: #f4f0e8;
+    pointer-events: auto;
+  }
+
+  .game-title {
+    font-family: 'Permanent Marker', cursive;
+    font-size: clamp(2rem, 4vw, 3rem);
+    color: #cc0000;
+    text-transform: lowercase;
+    margin: 0 0 10px 0;
+    letter-spacing: 2px;
+    text-shadow: 0 4px 12px rgba(0, 0, 0, 0.9);
+    text-align: right;
+  }
+
+  .game-subtitle {
+    font-family: 'Cutive Mono', monospace;
+    font-size: 0.9rem;
+    color: #888;
+    margin-bottom: 35px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    text-align: right;
+  }
+
+  .menu-options {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    align-items: flex-end;
+  }
+
+  .menu-btn {
+    background: transparent;
+    border: none;
+    color: #888;
+    font-family: 'Special Elite', monospace;
+    font-size: 1.25rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: all 0.25s ease;
+    outline: none;
+    text-shadow: 2px 2px 0px #000;
+  }
+
+  .menu-btn .btn-arrow {
+    opacity: 0;
+    transform: translateX(-5px);
+    transition: all 0.2s ease;
+    color: #cc0000;
+  }
+
+  .menu-btn:hover {
+    color: #cc0000;
+    transform: scale(1.05);
+  }
+
+  .menu-btn:hover .btn-arrow {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  /* Credits overlay in menu */
+  .menu-credits-overlay {
+    position: absolute;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    z-index: 110;
+    display: grid;
+    place-items: center;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(8px);
+  }
+
+  .credits-card {
+    background: rgba(16, 14, 12, 0.96);
+    border: 2px solid #c5a059;
+    border-radius: 6px;
+    padding: 40px 35px;
+    max-width: 450px;
+    width: 90%;
+    box-sizing: border-box;
+    position: relative;
+    text-align: center;
+    color: #f5f0e0;
+    font-family: 'Cutive Mono', monospace;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.95);
+  }
+
+  .credits-title {
+    font-family: 'Special Elite', monospace;
+    font-size: 1.5rem;
+    color: #ffd700;
+    margin-top: 0;
+    margin-bottom: 25px;
+    border-bottom: 1px double rgba(197, 160, 89, 0.5);
+    padding-bottom: 10px;
+    letter-spacing: 1.5px;
+  }
+
+  .credits-author {
+    font-size: 1.1rem;
+    color: #fff;
+    margin-bottom: 5px;
+    font-weight: bold;
+  }
+
+  .credits-target {
+    font-size: 0.9rem;
+    color: #bfa883;
+    margin-bottom: 20px;
+  }
+
+  .credits-dedication {
+    font-size: 0.8rem;
+    line-height: 1.6;
+    color: #e3dec9;
+    text-align: justify;
+    margin-bottom: 0;
+  }
+
+  .close-credits-btn {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    font-size: 2rem;
+    color: #c5a059;
+    background: none;
+    border: none;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0;
+  }
+
+  .close-credits-btn:hover {
+    color: #ffd700;
+  }
+
+  /* HUD drawer container and slide-out panel layout on the right */
+  .hud-drawer-container {
+    position: absolute;
+    right: 0;
+    top: 430px;
+    bottom: 60px;
+    z-index: 30;
+    display: flex;
+    align-items: flex-start;
+    pointer-events: none;
+  }
+
+  .hud-tabs-column {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    pointer-events: auto;
+    background: rgba(10, 10, 10, 0.88);
+    border: 2px solid #333;
+    border-right: none;
+    border-radius: 8px 0 0 8px;
+    padding: 12px 6px;
+    box-shadow: -5px 5px 15px rgba(0,0,0,0.5);
+  }
+
+  .hud-tab-btn {
+    background: transparent;
+    border: none;
+    color: #888;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    font-size: 1.2rem;
+    padding: 8px;
+    transition: all 0.2s ease;
+    border-radius: 4px;
+  }
+
+  .hud-tab-btn:hover, .hud-tab-btn.active {
+    color: #cc0000;
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  .hud-tab-btn .tab-label {
+    font-family: 'Special Elite', monospace;
+    font-size: 0.6rem;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+  }
+
+  .hud-drawer-content {
+    width: 0;
+    opacity: 0;
+    overflow: hidden;
+    height: 100%;
+    transition: width 0.3s cubic-bezier(0.19, 1, 0.22, 1), opacity 0.2s ease;
+    background: linear-gradient(135deg, #1b1b1b 0%, #0d0d0d 100%);
+    border: 0 solid #000;
+    border-radius: 0 0 0 8px;
+    box-shadow: -8px 8px 20px rgba(0,0,0,0.7), inset 1px 1px 2px rgba(255,255,255,0.1);
+  }
+
+  .hud-drawer-content.open {
+    width: 280px;
+    opacity: 1;
+    border-left: 4px solid #000;
+    border-bottom: 4px solid #000;
+    border-top: 4px solid #000;
+    pointer-events: auto;
+  }
+
+  .panel-content {
+    padding: 20px;
+    height: 100%;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .panel-title {
+    font-family: 'Special Elite', monospace;
+    font-size: 1rem;
+    color: #666;
+    margin: 0 0 18px 0;
+    border-bottom: 2px double #333;
+    padding-bottom: 5px;
+    text-align: center;
+    letter-spacing: 1px;
+  }
+
+  .panel-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 18px;
+    gap: 12px;
+  }
+
+  .panel-control-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .panel-control-group label {
+    font-family: 'Special Elite', monospace;
+    font-size: 0.75rem;
+    color: #555;
+  }
+
+  .panel-channel-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 5px;
+    border-top: 2px solid #222;
+    padding-top: 15px;
+  }
+
+  .panel-channel-btn {
+    font-family: 'Special Elite', monospace;
+    font-size: 0.75rem;
+    color: #777;
+    background: #0f0f0f;
+    border: 1px solid #222;
+    padding: 4px 0;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .panel-channel-btn:hover {
+    color: #fff;
+    background: #1a1a1a;
+  }
+
+  .panel-channel-btn.active {
+    color: #fff;
+    background: #cc0000;
+    border-color: #ff3333;
+    text-shadow: 0 0 3px #fff;
+  }
+
+  /* Room Elements Visibility Toggles styling */
+  .elements-list-container {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding-top: 5px;
+  }
+
+  .element-checkbox-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    font-family: 'Special Elite', monospace;
+    font-size: 0.8rem;
+    color: #aaa;
+    transition: color 0.2s;
+    user-select: none;
+  }
+
+  .element-checkbox-row:hover {
+    color: #f4f0e8;
+  }
+
+  .element-checkbox-row input {
+    display: none;
+  }
+
+  .checkbox-custom {
+    width: 18px;
+    height: 18px;
+    border: 2px solid #444;
+    border-radius: 3px;
+    background: #050505;
+    position: relative;
+    transition: all 0.2s;
+  }
+
+  .element-checkbox-row input:checked + .checkbox-custom {
+    border-color: #cc0000;
+    background: rgba(204, 0, 0, 0.2);
+    box-shadow: 0 0 8px rgba(204, 0, 0, 0.4);
+  }
+
+  .element-checkbox-row input:checked + .checkbox-custom::after {
+    content: '';
+    position: absolute;
+    left: 5px;
+    top: 1px;
+    width: 5px;
+    height: 10px;
+    border: solid #cc0000;
+    border-width: 0 2.5px 2.5px 0;
+    transform: rotate(45deg);
+  }
+
+  .checkbox-label {
+    letter-spacing: 0.5px;
+  }
+
   @media (max-width: 900px) {
-    .navbar-overlay {
-      padding: 10px 15px;
-      flex-wrap: wrap;
-      gap: 10px;
+    .hud-drawer-container {
+      top: auto;
+      bottom: 25px;
+      right: 0;
+      left: 0;
+      flex-direction: column-reverse;
+      align-items: stretch;
+      bottom: 12px;
     }
-    .controls-right {
+    .hud-tabs-column {
+      flex-direction: row;
+      border-radius: 8px 8px 0 0;
+      border: 2px solid #333;
+      border-bottom: none;
+      justify-content: space-around;
+      padding: 6px 12px;
+    }
+    .hud-drawer-content.open {
       width: 100%;
-      justify-content: space-between;
+      height: 200px;
+      border-left: 2px solid #000;
+      border-right: 2px solid #000;
+      border-bottom: 2px solid #000;
+      border-top: none;
+      border-radius: 0;
     }
-    .tv-hud-controls {
+    .panel-channel-grid {
+      grid-template-columns: repeat(7, 1fr);
+      padding-top: 10px;
+    }
+    .album-plaque-overlay {
+      top: auto;
+      bottom: 230px;
+      right: 25px;
       left: 25px;
       width: calc(100% - 50px);
-      max-width: none;
+      box-shadow: 0 -5px 20px rgba(0,0,0,0.5);
     }
   }
 </style>

@@ -9,7 +9,7 @@
     tvChannel: number;
     canvasElement: HTMLCanvasElement | null;
     textureUpdateTrigger: number;
-    cameraMode: 'free' | 'poem' | 'piano' | 'telephone' | 'tv';
+    cameraMode: 'menu' | 'free' | 'poem' | 'piano' | 'telephone' | 'tv';
     resetTrigger?: number;
     bookCanvasElement: HTMLCanvasElement | null;
     sheetCanvasElement: HTMLCanvasElement | null;
@@ -23,6 +23,14 @@
     telephoneLight: boolean;
     tableLamp: boolean;
     couchSpotlight: boolean;
+    albumLights: boolean;
+    onAlbumHover?: (album: any | null) => void;
+    onAlbumClick?: (album: any) => void;
+    showAlbums?: boolean;
+    showCouchAndDesk?: boolean;
+    showTV?: boolean;
+    showTelephone?: boolean;
+    showPiano?: boolean;
   }
   let { 
     tvPower, 
@@ -42,7 +50,15 @@
     pianoLight,
     telephoneLight,
     tableLamp,
-    couchSpotlight
+    couchSpotlight,
+    albumLights,
+    onAlbumHover,
+    onAlbumClick,
+    showAlbums = true,
+    showCouchAndDesk = true,
+    showTV = true,
+    showTelephone = true,
+    showPiano = true
   }: Props = $props();
 
   let cameraPosition = $state<[number, number, number]>([0.3, 0.85, 1.3]);
@@ -53,7 +69,10 @@
 
   // Adjust camera position and controls look-at target based on viewing mode
   $effect(() => {
-    if (cameraMode === 'poem') {
+    if (cameraMode === 'menu') {
+      cameraPosition = [4.5, 3.8, 6.5];
+      cameraTarget = [0, 0.5, 0.2];
+    } else if (cameraMode === 'poem') {
       cameraPosition = [0.3, 0.85, 1.3];
       cameraTarget = [0.3, 0.29, 1.75];
     } else if (cameraMode === 'piano') {
@@ -133,6 +152,14 @@
       {telephoneLight}
       {tableLamp}
       {couchSpotlight}
+      {albumLights}
+      {onAlbumHover}
+      {onAlbumClick}
+      {showAlbums}
+      {showCouchAndDesk}
+      {showTV}
+      {showTelephone}
+      {showPiano}
     />
 
     {#if camera && controls}

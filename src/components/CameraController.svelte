@@ -1,5 +1,7 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
   import { useTask } from '@threlte/core';
+  import * as THREE from 'three';
 
 interface Props {
     camera: any;
@@ -15,6 +17,40 @@ interface Props {
   let lerpActive = $state(false);
   let lastPosition = $state<[number, number, number] | null>(null);
   let lastResetTrigger = $state(0);
+
+  let keysPressed = {
+    w: false,
+    a: false,
+    s: false,
+    d: false
+  };
+
+  onMount(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (cameraMode !== 'free') return;
+      if (document.activeElement?.tagName === 'INPUT') return;
+
+      const key = e.key.toLowerCase();
+      if (key in keysPressed) {
+        keysPressed[key as keyof typeof keysPressed] = true;
+      }
+    };
+
+    const handleKeyUp = (e: KeyboardEvent) => {
+      const key = e.key.toLowerCase();
+      if (key in keysPressed) {
+        keysPressed[key as keyof typeof keysPressed] = false;
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+    };
+  });
 
   // Monitor target cameraPosition changes and trigger smooth cinematic glide
   $effect(() => {
@@ -55,9 +91,48 @@ interface Props {
     }
   });
 
-  // Smooth cinematic glide — only active in non-free modes
+  // Smooth cinematic glide — active for movement and transitions
   useTask(() => {
-    if (!camera || !controls || !lerpActive) return;
+    if (!camera || !controls) return;
+
+    // Handle auto-rotation in menu mode
+    if (cameraMode === 'menu') {
+      controls.autoRotate = true;
+      controls.autoRotateSpeed = 1.0;
+      controls.update();
+      return;
+    } else {
+      controls.autoRotate = false;
+    }
+
+    // Handle WASD keyboard movement in freecam
+    if (cameraMode === 'free' && !lerpActive) {
+      const moveSpeed = 0.08;
+      const forward = new THREE.Vector3();
+      camera.getWorldDirection(forward);
+      forward.y = 0; // Lock movement to XZ plane
+      forward.normalize();
+
+      const right = new THREE.Vector3();
+      right.crossVectors(forward, camera.up);
+      right.y = 0;
+      right.normalize();
+
+      const moveVector = new THREE.Vector3();
+      if (keysPressed.w) moveVector.addScaledVector(forward, moveSpeed);
+      if (keysPressed.s) moveVector.addScaledVector(forward, -moveSpeed);
+      if (keysPressed.d) moveVector.addScaledVector(right, moveSpeed);
+      if (keysPressed.a) moveVector.addScaledVector(right, -moveSpeed);
+
+      if (moveVector.lengthSq() > 0) {
+        camera.position.add(moveVector);
+        controls.target.add(moveVector);
+      }
+      controls.update();
+      return;
+    }
+
+    if (!lerpActive) return;
 
     const [targetX, targetY, targetZ] = cameraPosition;
     const [tX, tY, tZ] = cameraTarget;
